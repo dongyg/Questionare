@@ -1,0 +1,226 @@
+$def with (pagedata={})
+$code:
+    static_host = pagedata.get('static_host','')
+    param = pagedata.get('PARAMS')
+    faq = param.get('faq','0')
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="问卷调查大师 调查问卷 有奖问卷 免费问卷 红包问卷 互填问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统。问卷调查，有奖问卷，红包问卷，免费问卷" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>帮助中心</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-metro.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-responsive.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/themes/light.css" rel="stylesheet" type="text/css" id="style_color"/>
+    <link href="$static_host/static/uniform/css/uniform.default.min.css" rel="stylesheet" type="text/css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body class="page-header-fixed page-full-width">
+    $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+        <a class="btn btn-block disabled">常见问题</a>
+    <br>
+    <div class="accordion" id="accordion1">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq0" >
+                <i class="icon-question-sign"></i> 怎样可以参加调查问卷并参与抽奖？
+                </a>
+            </div>
+            <div id="collapse_faq0" class="accordion-body collapse$(' in' if faq=='0' else '')">
+                <div class="accordion-inner">
+                    1、从朋友圈或问卷发布人分发的问卷链接，进入答卷页面；<br>
+                    2、在公众号中点击【答问卷】菜单可得到公开调查的问卷参与链接，进入答卷页面；<br>
+                    对有奖问卷，完成答卷即可得到抽奖号参与抽奖。<br>
+                    PS：如果你发布了一个有奖问卷，参与此问卷的用户是新用户，你即成为该用户的引荐人，以后该用户参与其它有奖问卷时，你也可同时获得一个抽奖号。
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq00" >
+                <i class="icon-question-sign"></i> 有奖问卷抽奖规则
+                </a>
+            </div>
+            <div id="collapse_faq00" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    1、参与答卷后答卷人获得一个抽奖号，每个问卷从1开始编号。同时答卷人的引荐人也将获得一个抽奖号。<br>
+                    2、问卷结束时，取当天或其后的最近一个交易日深交所深成指成交金额，乘以100，除以问卷最大抽奖号，得到的余数加1，为中奖号。<br>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq01" >
+                <i class="icon-question-sign"></i> 中奖后怎么领奖？
+                </a>
+            </div>
+            <div id="collapse_faq01" class="accordion-body collapse$(' in' if faq=='01' else '')">
+                <div class="accordion-inner">
+                    1、对支持匿名领奖的问卷，中奖人需要添加问卷调查大师客服为微信好友咨询领奖事宜（客服微信号diaochadashi8）。可支持在电商网站自行购买商品，付款时用微信好友代付款方式由客服代为付款（例如京东）。问卷调查大师只负责代中奖人付款，由电商直接寄送奖品，问卷调查大师不负责退换货、保修等服务。<br>
+                    2、不支持匿名领奖的问卷，中奖人可能需要提供通信地址、电话等信息以便接收奖品，这取决于奖品形式，例如奖品是消费代金券的话，多数也是不需要提供联系信息的。奖品由问卷发布人发送，代金券等则是在消费时抵用。问卷调查大师不承担奖品发放责任。<br>
+                    PS：请妥善保管兑奖号码，兑奖号码是领奖的唯一凭证。
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq1" >
+                <i class="icon-question-sign"></i> 为什么每天发布的普通问卷有数量限制？
+                </a>
+            </div>
+            <div id="collapse_faq1" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    为了保证问卷质量，避免无意义的问卷带来消耗，普通问卷设置了一定的每日限额，倡导网友们注意节约资源。
+                </div>
+            </div>
+        </div>
+<!--         <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq2" >
+                <i class="icon-question-sign"></i> 为什么问卷需要审核？
+                </a>
+            </div>
+            <div id="collapse_faq2" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    净网人人有责。
+                </div>
+            </div>
+        </div> -->
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq3" >
+                <i class="icon-question-sign"></i> 有奖问卷为什么要先付保证金？
+                </a>
+            </div>
+            <div id="collapse_faq3" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    有奖问卷采用有奖调查的方式，调查结束后抽取参与人发放奖品。保证金可以保障中奖人权益，避免问卷发布人不履行奖品发放承诺。保证金方法还能够做到完全匿名的领奖，中奖人可以在电商网站自行购买商品，由平台使用保证金代为付款，领奖过程平台和问卷发布人都无需获取中奖人信息，能够保护用户隐私。
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq4" >
+                <i class="icon-question-sign"></i> 什么情况可以退保证金？
+                </a>
+            </div>
+            <div id="collapse_faq4" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    问卷发布人采用自行寄送奖品的方式发放奖品时，在中奖人确认收货后，保证金全额可退。
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq5" >
+                <i class="icon-question-sign"></i> 什么情况要追加保证金？
+                </a>
+            </div>
+            <div id="collapse_faq5" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    在奖品市场价格高于原定奖品价值，或高于问卷发布时所付保证金金额时，保证金不足以支持平台为用户代付款购买所承诺奖品时，需要追加保证金。
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq51" >
+                <i class="icon-question-sign"></i> 以前发过的问卷到哪里找？
+                </a>
+            </div>
+            <div id="collapse_faq51" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    点击【发问卷】-【我发布的问卷】菜单，可打开页面浏览曾经发过的问卷。未编辑完的问卷可以继续编辑、发布。
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq52" >
+                <i class="icon-question-sign"></i> 问卷题目怎么编辑和保存？
+                </a>
+            </div>
+            <div id="collapse_faq52" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    问卷题目支持单选/多选等多种类型，每添加一个题目时请按需要选择设置。设置题目时的展现形式与答卷时的题目展现形式是一样的（所见即所得的）。添加一个题目确定后，便已保存到服务器，不需要另外保存。问卷题目未设置完的话，可以日后随时进入我发布的问卷，找到问卷，编辑题目。
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq7" >
+                <i class="icon-question-sign"></i> 平台怎样保证调查样本效率？
+                </a>
+            </div>
+            <div id="collapse_faq7" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    每个问卷的每个样本数据都保存在数据库中存档，但因受限于微信公众平台所开放的功能，平台只能获取和保存每个样本（用户）的有限信息，包括OPID/IP等，但无法对应到真实的自然人，也无法获得其联系信息，不能做到回访抽查。
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq8" >
+                <i class="icon-question-sign"></i> 为什么问卷没有推送？哪些问卷会被推送？
+                </a>
+            </div>
+            <div id="collapse_faq8" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    因为平台内发布的问卷很多，以及公众号平台在群发、单发、接口调用次数等方面的限制，所以无法推送所有的问卷。平台会根据奖品价值/目标样本/回收率等因素将问卷进行排队推送。自己发送的问卷搜索和拉取时是无法获取到的，如果您想测试一下，请使用另外的微信号。
+                </div>
+            </div>
+        </div>
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_faq9" >
+                <i class="icon-question-sign"></i> 税费问题
+                </a>
+            </div>
+            <div id="collapse_faq9" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    系统为广大网友提供问卷调查的发布和参与平台，不以盈利为目的，不收取任何费用，所产生的微信支付手续费、中奖个人所得税等税费需要由问卷发布人承担，有奖问卷自行兑奖的退还保证金时可全额退款。我们也不提供相应发票，敬请谅解。
+                </div>
+            </div>
+        </div>
+    </div>
+    $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+        <a href="javascript:history.back();" class="btn btn-block">返回</a>
+    <br>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/bootstrap.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/uniform/jquery.uniform.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script>
+        jQuery(document).ready(function() {
+            initUniform();
+        });
+    </script>
+</body>
+</html>

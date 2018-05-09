@@ -1,0 +1,1 @@
+sudo memcached -p 11211 -m 64 -u root -d

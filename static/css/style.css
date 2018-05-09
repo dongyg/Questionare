@@ -1,0 +1,327 @@
+/*********************
+ GENERAL UI COLORS
+*********************/
+
+/***
+Colors
+blue:  #4b8df8
+light blue: #bfd5fa
+red: #e02222
+yellow: #ffb848
+green: #35aa47
+purple: #852b99
+grey: #555555;
+light grey: #fafafa;
+***/
+
+/*********************
+ GENERAL RESET & SETUP
+*********************/
+
+/***
+Import fonts
+***/
+
+@import url(//fonts.googleapis.com/css?family=Open+Sans:400,300,600,700);
+
+/*** load open sans font from local
+@import url(../fonts/font.css);
+***/
+
+/***
+Reset and overrides
+***/
+/* general body settings */
+body {
+  color: #000;
+  font-family: 'Open Sans', sans-serif;
+  padding: 0px !important;
+  margin: 0px !important;
+  font-size:13px;
+  direction: ltr;
+}
+
+/* overides metro scrolbars in IE10 and makes them look like a default scrollbar */
+@-ms-viewport{
+  width: auto !important;
+}
+
+/***
+General typography
+***/
+h3 small, h4 small, h5 small {
+  color: #444;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 300;
+}
+
+h1.block, h2.block, h3.block, h4.block, h5.block, h6.block {
+  padding-bottom: 10px;
+}
+
+a {
+  text-shadow: none !important;
+  color: #0d638f;
+}
+
+/***
+General backgrounds
+***/
+.bg-blue {
+  background-image: none !important;
+  background-color: #4b8df8 !important;
+}
+
+.bg-red {
+  background-image: none !important;
+  background-color: #e02222 !important;
+}
+
+.bg-yellow {
+  background-image: none !important;
+  background-color: #ffb848 !important;
+}
+
+.bg-green {
+  background-image: none !important;
+  background-color: #35aa47 !important;
+}
+
+.bg-purple {
+  background-image: none !important;
+  background-color: #852b99 !important;
+}
+
+.bg-grey {
+  background-image: none !important;
+  background-color: #555555 !important;
+}
+
+/***
+Apply fix for font awesome icons.
+***/
+[class^="icon-"],
+[class*=" icon-"],
+[class^="icon-"]:hover,
+[class*=" icon-"]:hover {
+  background: none !important;
+}
+
+/***
+Make font awesome icons fixed width(latest version issue)
+***/
+li [class^="icon-"],
+li [class*=" icon-"] {
+  display: inline-block;
+  width: 1.25em;
+  text-align: center;
+}
+li [class^="icon-"].icon-large,
+li [class*=" icon-"].icon-large {
+  /* increased font size for icon-large */
+  width: 1.5625em;
+}
+
+/***
+Close icon used for modal dialog and other UI element close buttons
+***/
+.close {
+  display: inline-block;
+  margin-top: 0px;
+  margin-right: 0px;
+  width: 9px;
+  height: 9px;
+  background-repeat: no-repeat !important;
+  background-image: url("../img/remove-icon-small.png") !important;
+}
+
+/***
+Fix link outlines after click
+***/
+a,a:focus, a:hover, a:active {
+  outline: 0;
+}
+
+/***
+IE8 fix for form input height in fluid rows
+***/
+.ie8 .row-fluid [class*="span"] {
+    min-height: 20px !important;
+}
+
+/***
+Fix grid offset used for reponsive layout handling(refer app.js=>handleResponsive)
+***/
+.fix-offset {
+  margin-left: 0px !important;
+}
+
+/***
+Uniform plugin css changes
+***/
+
+.radio, .checkbox {
+  padding-left: 0px !important;
+}
+
+.checkbox .checker {
+  margin-top: -2px !important;
+  margin-right: 2px !important;
+}
+
+.checkbox .checker input,
+.radio .radio input {
+  outline: none !important;
+}
+
+.controls .text {
+  display: block;
+  margin-top: 7px;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.controls .text-inline {
+  display: inline-block;
+  margin-top: 8px;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+
+/* used for non horizontal forms */
+.controls-uniform {
+  margin-top: -7px;
+}
+
+/***
+General forms settings
+***/
+input.placeholder,
+textarea.placeholder {
+  color: #aaa !important;
+}
+
+.help-block {
+ margin-top: 5px !important;
+}
+
+.form-inline input {
+  margin-bottom: 0px !important;
+}
+
+.control-label {
+  margin-top: 2px;
+}
+
+.control-label .required {
+  color: #e02222;
+  font-size: 12px;
+  padding-left: 2px;
+}
+
+.validate-inline {
+  display: inline-block;
+  *display: inline;
+  padding-left: 5px;
+  vertical-align: middle;
+  *zoom: 1;
+  margin-top: 6px;
+}
+
+.control-group.success .validate-inline {
+  color: #468847;
+}
+
+.control-group.info .validate-inline {
+  color: #3a87ad;
+}
+
+.control-group.error .validate-inline {
+  color: #b94a48;
+}
+
+.control-group.warning .validate-inline {
+  color: #c09853;
+}
+
+.help-inline {
+  margin-top: 6px;
+}
+
+.help-small {
+  font-size: 12px;
+  padding-top: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.success .validate-inline.ok:before,
+.success .help-inline.ok:before {
+  content: "\f00c";
+  font-size: 16px;
+  font-family: FontAwesome;
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+}
+
+
+form legend,
+.form-view legend {
+  margin-bottom: 15px !important;
+}
+
+.controls > .radio .checker,
+.controls > .checkbox .checker {
+  margin-right: 2px !important;
+}
+
+.controls > .radio,
+.controls > .checkbox {
+  display: inline-block;
+  padding: 0 !important;
+  margin: 0 !important;
+  margin-top: 8px !important;
+  margin-right: 15px !important;
+}
+
+.controls > .radio.line,
+.controls > .checkbox.line {
+  display: block;
+  padding: 0 !important;
+  margin: 0 !important;
+  margin-top: 5px !important;
+}
+
+.controls .inline {
+  margin-top: 8px;
+}
+
+.form-view .control-group {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+
+.uploader {
+  margin-top: 2px !important;
+}
+
+/***
+Accordions
+***/
+.accordion-heading {
+  background:#eee;
+}
+
+.accordion-heading a {
+  text-decoration:none;
+}
+
+.accordion-heading a:hover {
+  text-decoration:none;
+}
+

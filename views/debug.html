@@ -1,0 +1,76 @@
+$def with (pagedata={})
+$code:
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    fsid = FSOBJ.FS_ID if FSOBJ else pagedata.get('fsid',"30515173")
+    random_value = pagedata.get('random_value','')
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>debug</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-metro.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-responsive.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/themes/light.css" rel="stylesheet" type="text/css" id="style_color"/>
+    <link href="$static_host/static/uniform/css/uniform.default.min.css" rel="stylesheet" type="text/css"/>
+</head>
+<body class="page-header-fixed page-full-width">
+    <div>
+        <pre id="preTest">$fsid : $random_value 当前缓存用户对象：$pagedata.get('cacher_fsobj_count')个</pre>
+    </div>
+    <div class="row" style="margin-left: 0px;">
+        <div style="margin-left: 10px;" class="span4">
+            <a href="/link?fsid=$fsid&r=$random_value&state=" target="_blank">答问卷</a>
+            <a href="http://mp.weixin.qq.com/s/FqZr-unnJEn_xlYURxLfhg" target="_blank">答问卷说明</a>
+            <a href="http://mp.weixin.qq.com/s/SbYos2XY4KHhaDViQsFN9A" target="_blank">发问卷说明</a>
+            <a href="http://mp.weixin.qq.com/s/_xm_DkgfKGXEnt4FXyO5ig" target="_blank">推广计划</a>
+            <a href="http://mp.weixin.qq.com/s/EYlO-A5I_ccUHKuJj6EAoQ" target="_blank">调查币</a>
+            <hr>
+            <a href="/topic1?fsid=$fsid&r=$random_value&tpid=" target="_blank">创建话题问卷</a>
+            <a href="/newfromtp?fsid=$fsid&r=$random_value&tpid=" target="_blank">从模板创建问卷</a>
+            <hr>
+            <a href="/p12?fsid=$fsid&r=$random_value" target="_blank">已参与问卷</a>
+            <a href="/p13?fsid=$fsid&r=$random_value" target="_blank">中奖记录</a>
+            <hr>
+            <a href="/paid1?fsid=$fsid&r=$random_value" target="_blank">发有奖问卷</a>
+            <a href="/hong1?fsid=$fsid&r=$random_value" target="_blank">发红包问卷</a>
+            <a href="/nopay1?fsid=$fsid&r=$random_value" target="_blank">发普通问卷</a>
+            <br><br>
+            <a href="/createqs?fsid=$fsid&r=$random_value" target="_blank">通用问卷创建入口</a>
+            <a href="/p23?fsid=$fsid&r=$random_value" target="_blank">我发布的问卷</a>
+            <hr>
+            <a href="/p31?fsid=$fsid&r=$random_value" target="_blank">个人信息设置</a>
+            <a href="/faq" target="_blank">帮助中心</a>
+            <a href="/about" target="_blank">关于</a>
+            <a href="/admin/bawj?fsid=$fsid&r=$random_value">扒问卷星</a>
+        </div>
+        <div class="span10" style="float:right;">
+            <pre>$json_string(pagedata.get('app_configuration',{}),pretty=True)</pre>
+        </div>
+    </div>
+    $if pagedata.get('cacher_random_checker'):
+        <div><pre>$pagedata.get('cacher_random_checker')</pre></div>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js"></script>
+    <script>
+        // Fallback to loading jQuery from a local path if the CDN is unavailable
+        (window.jQuery || document.write('<script src="$static_host/static/jquery-1.10.1.min.js"><\/script>'));
+    </script>
+    <script>
+        jQuery(document).ready(function() {
+            jQuery('#preTest').text();
+        });
+    </script>
+</body>
+</html>

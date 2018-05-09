@@ -1,0 +1,140 @@
+$def with (pagedata={})
+$code:
+    static_host = pagedata.get('static_host','')
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="baidu-site-verification" content="TfEvn6j8cy" />
+    <meta name="msvalidate.01" content="BAD453328769040852C6A43B3ABE5F4F" />
+    <meta name="google-site-verification" content="tBWt1k03DPvDCZEiFdXP6tcj7PZWm6271znuO6Yvzsw" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="问卷调查大师 调查问卷 有奖问卷 免费问卷 红包问卷 互填问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统。问卷调查，有奖问卷，红包问卷，免费问卷" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>问卷调查大师 - 问卷调查|有奖问卷|免费问卷</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-metro.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-responsive.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/themes/grey.css" rel="stylesheet" type="text/css" id="style_color"/>
+    <link href="$static_host/static/css/pages/promo.css" rel="stylesheet" type="text/css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body class="page-header-fixed page-full-width">
+    $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+        <div class="header navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <div class="container" style="padding-top: 9px;">
+                        <p style="color:#fff;">问卷调查大师</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <div class="page-container row-fluid">
+        <div class="page-content no-min-height" style="margin-left:0px;margin-top:41px;">
+            <div class="container-fluid promo-page">
+                <div class="row-fluid">
+                    <div class="span12">
+                        <div class="block-blue">
+                            <div class="container">
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <h3>有奖问卷</h3>
+                                        <p>任何人都可以发布，提供奖品给问卷参与人</p>
+                                        <p>有奖调查，定向投放，因为有偿所以高效</p>
+                                        <p>发问卷的同时还可以上传图片，描述你的企业和产品，调查、宣传同时做</p>
+                                        <p>所发问卷为服务号引入新的粉丝，不用参与有奖问卷调查也能参与抽奖，躺在家里会有奖品从天而降，这种好事只在这里有</p>
+                                        <a href="http://mp.weixin.qq.com/s/SbYos2XY4KHhaDViQsFN9A" class="btn">查看详情</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-grey">
+                            <div class="container">
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <h3>普通问卷</h3>
+                                        <p>任何人都可以免费发布</p>
+                                        <p>无需任何费用，自行投放，自由灵活</p>
+                                        <a href="http://mp.weixin.qq.com/s/SbYos2XY4KHhaDViQsFN9A" class="btn">查看详情</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-red">
+                            <div class="container">
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <h3>红包问卷</h3>
+                                        <p>任何人都可以发布，提供红包供答卷人分抢</p>
+                                        <p>不一样的问卷，不一样的红包</p>
+                                        <a href="http://mp.weixin.qq.com/s/SbYos2XY4KHhaDViQsFN9A" class="btn">查看详情</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-footer">
+                            <div class="container">
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <h3>参与答卷</h3>
+                                        <p>任何人都可以参与有奖问卷获得抽奖号，参与抽奖</p>
+                                        <p>不答卷也能参与抽奖。若你投放有奖问卷的参与者成为服务号新粉丝，此用户日后参与有奖问卷调查时，你也将同时获得一个抽奖号，躺在家里也能抽大奖</p>
+                                        <p>支持中奖人匿名领奖。参与有奖问卷不再需要提供电话住址，支持匿名领奖的问卷，中奖者可以在电商平台自行购买商品，由平台代为付款，不需要提供通讯地址和电话等信息，毫无隐私泄露问题</p>
+                                        <a href="http://mp.weixin.qq.com/s/FqZr-unnJEn_xlYURxLfhg" class="btn">查看详情</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block-blue">
+                            <div class="container">
+                                <div class="row-fluid">
+                                    <div class="span12">
+                                        <h3>微信扫码立即发问卷</h3>
+                                        <p><img src="$static_host/static/img/qrcode_diaochadashi.jpg"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="container">
+            <div class="footer-inner">
+                2016 - 2017 &copy; Aifetel
+            </div>
+        </div>
+    </div>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script>
+        jQuery(document).ready(function() {
+        });
+    </script>
+</body>
+</html>

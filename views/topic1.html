@@ -1,0 +1,237 @@
+$def with (pagedata={})
+$code:
+    #发布话题问卷第1步，输入姓名或绰号
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    TPOBJ = pagedata.get('TPOBJ')
+    QNOBJ = pagedata.get('QNOBJ')
+    REFQN = pagedata.get('REFQN')
+    random_value = pagedata.get('r','')
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>创建话题问卷</title>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            创建话题问卷
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+
+                    </div>
+                </div>
+
+            <div class="weui-cells__title" style="text-align: center;">$TPOBJ.QN_TITLE</div>
+            <form id="theform" enctype="multipart/form-data" >
+            <input type="hidden" id="fsid" name="fsid" value="$(FSOBJ.FS_ID)">
+            <input type="hidden" id="r" name="r" value="$random_value">
+            <input type="hidden" id="tpid" name="tpid" value="$(TPOBJ.QN_ID if TPOBJ else '')">
+            <input type="hidden" id="qnid" name="qnid" value="$(QNOBJ.QN_ID if QNOBJ else '')">
+            <input type="hidden" id="refqn" name="refqn" value="$(REFQN.QN_ID if REFQN else '')">
+            <div class="weui-cells">
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <input class="weui-input" type="text" id="QN_TITLE" name="QN_TITLE" placeholder="你可以使用更有个性的问卷标题" value="$(TPOBJ.QN_TITLE)" />
+                    </div>
+                </div>
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <textarea class="weui-textarea" autocomplete="off" id="QN_SUMMARY" name="QN_SUMMARY" onkeyup="changeSummary()" placeholder="$(TPOBJ.PRIZE_TITLE if TPOBJ else '输入你的姓名或昵称')" rows="3"></textarea>
+                        <div class="weui-textarea-counter"><span id="spanTextLength">0</span>/2000</div>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-cells weui-cells_form">
+                <div class="weui-cell weui-cell_switch">
+                    <div class="weui-cell__bd">公开统计结果</div>
+                    <div class="weui-cell__ft">
+                        <label for="QN_PUBLIC" class="weui-switch-cp">
+                            <input id="QN_PUBLIC" name="QN_PUBLIC" class="weui-switch-cp__input" type="checkbox" value="1" $:('checked="checked"' if not QNOBJ or (QNOBJ and QNOBJ.QN_PUBLIC==1) else '') />
+                            <div class="weui-switch-cp__box"></div>
+                        </label>
+                    </div>
+                </div>
+                <div class="weui-cell weui-cell_switch">
+                    <div class="weui-cell__bd">发红包</div>
+                    <div class="weui-cell__ft">
+                        <label for="sw_hongbao" class="weui-switch-cp">
+                            <input id="sw_hongbao" name="sw_hongbao" class="weui-switch-cp__input" type="checkbox" value="1" $:('checked="checked"' if not QNOBJ or (QNOBJ and QNOBJ.PRIZE_VALUE) else '') onchange="changeHongbao()" />
+                            <div class="weui-switch-cp__box"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-cells weui-cells_form" id="divHongbaoPamram" style="display:$:('block' if not QNOBJ or (QNOBJ and QNOBJ.PRIZE_VALUE) else 'none')">
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <input class="weui-input" type="number" autocomplete="off" id="PRIZE_VALUE" name="PRIZE_VALUE" pattern="[0-9]*" placeholder="红包总金额" value="$(QNOBJ.PRIZE_VALUE if QNOBJ else '')"/>
+                    </div>
+                </div>
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <input class="weui-input" type="number" autocomplete="off" id="HONGBAO_NUM" name="HONGBAO_NUM" pattern="[0-9]*" placeholder="红包个数" value="$(QNOBJ.HONGBAO_NUM if QNOBJ else '')"/>
+                    </div>
+                </div>
+                <div class="weui-cell weui-cell_switch">
+                    <div class="weui-cell__bd">固定金额</div>
+                    <div class="weui-cell__ft">
+                        <label for="HONGBAO_MNY" class="weui-switch-cp">
+                            <input id="HONGBAO_MNY" name="HONGBAO_MNY" class="weui-switch-cp__input" type="checkbox" value="0" $:('checked="checked"' if QNOBJ and QNOBJ.HONGBAO_MNY!=0 else '') />
+                            <div class="weui-switch-cp__box"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-cells__tips" id="divHongbaoTip">不选固定金额的话就是拼手气红包，每个红包金额在平均金额左右随机有所浮动</div>
+            <div class="weui-btn-area">
+                <a class="weui-btn weui-btn_primary" href="javascript:clickGoOn();" id="showTooltips">创建</a>
+            </div>
+            </form>
+        </div>
+    </div>
+    <!--BEGIN dialog2-->
+    <div class="js_dialog" id="iosDialog2" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__bd" id="dialogMessage"></div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+            </div>
+        </div>
+    </div>
+    <!--END dialog2-->
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            initUniform();
+            changeSummary();
+        });
+        var changeSummary = function() {
+            if (jQuery('#QN_SUMMARY').val().length>=2000) {
+                jQuery('#QN_SUMMARY').val( jQuery('#QN_SUMMARY').val().substr(0,2000) )
+            };
+            jQuery('#spanTextLength').text( jQuery('#QN_SUMMARY').val().length );
+        }
+        var changeHongbao = function() {
+            var data = jQuery('#theform').serialize(); //用val()或attr('checked')的方法拿不到checkbox的值。只好通过serialize来获取判断
+            if (data.indexOf('sw_hongbao')>=0) {
+                jQuery('#divHongbaoPamram').css('display','block')
+                jQuery('#divHongbaoTip').css('display','block')
+            }else{
+                jQuery('#divHongbaoPamram').css('display','none')
+                jQuery('#divHongbaoTip').css('display','none')
+            }
+        }
+        var checkForm = function() {
+            if (!jQuery('#QN_TITLE').val()) {
+                showDialogMessage('请输入问卷标题',function(){
+                    jQuery('#QN_TITLE').focus();
+                });
+                return false;
+            } else if (jQuery('#QN_TITLE').val().length>64) {
+                showDialogMessage('问卷标题最多64个字！',function(){
+                    jQuery('#QN_TITLE').focus();
+                });
+                return false;
+            };
+            if (jQuery('#theform').serialize().indexOf('sw_hongbao')>=0) {
+                if (!jQuery('#PRIZE_VALUE').val()) {
+                    showDialogMessage('请输入红包总金额',function(){
+                        jQuery('#PRIZE_VALUE').focus();
+                    });
+                    return false;
+                };
+                if (!jQuery('#HONGBAO_NUM').val()) {
+                    showDialogMessage('请输入红包个数',function(){
+                        jQuery('#HONGBAO_NUM').focus();
+                    });
+                    return false;
+                };
+            } else {
+                jQuery('#PRIZE_VALUE').val(0);
+                jQuery('#HONGBAO_NUM').val(0);
+            }
+            return true;
+        }
+        var clickGoOn = function () {
+            if (!checkForm()) {return};
+            jQuery.ajax({
+                url: '/rst/topic',
+                type: "POST",
+                async: false,
+                data: jQuery('#theform').serialize(),
+                beforeSend: function() {},
+                success: function(retval) {
+                    var data = JSON.parse(retval);
+                    if (data.success) {
+                        document.location.href = data.success;
+                    } else if (data.error) {
+                        showDialogMessage(data.error)
+                    } else {
+                        showDialogMessage('发生未知错误')
+                    }
+                },
+                error: ajaxErrorHandle
+            });
+        }
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'hideAllNonBaseMenuItem'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+            wx.error(function(res){
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+$def with (title,message,pagedata)
+$code:
+    static_host = pagedata.get('static_host','')
+    QNOBJ = pagedata.get('QNOBJ')
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>$title</title>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    .weui-msg__desc {font-size: 16px;}
+    </style>
+</head>
+<body>
+    <div class="page">
+
+        <div class="weui-msg">
+            <div class="weui-msg__icon-area"><i class="weui-icon-success weui-icon_msg"></i></div>
+            <div class="weui-msg__text-area">
+                <h2 class="weui-msg__title">$title</h2>
+                <p class="weui-msg__desc">$:message</span></p>
+                <br>
+                $:pagedata.get('INJECTAD','')
+            </div>
+            <div class="weui-msg__extra-area">
+                <div class="weui-footer">
+                    <p class="weui-footer__links">
+                        <a href="javascript:void(0);" class="weui-footer__link">问卷调查大师</a>
+                    </p>
+                    <p class="weui-footer__text">Copyright &copy; 2016 Aifetel</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    $if pagedata and QNOBJ and signPackage:
+        <script type="text/javascript">
+            wx.config({
+                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+                timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+                nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+                signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+                jsApiList: [
+                    'checkJsApi',
+                    'onMenuShareTimeline',
+                    'onMenuShareAppMessage',
+                    'onMenuShareQQ',
+                    'onMenuShareWeibo',
+                    'onMenuShareQZone'
+                ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+            });
+            wx.ready(function () {
+                var lineLink = "$:QNOBJ.SHARE_LINK";
+                var descContent = "$QNOBJ.SHARE_DESC";
+                var imgUrl = "$QNOBJ.SHARE_PICURL";
+                var shareTitle = "$QNOBJ.SHARE_TITLE";
+                wx.onMenuShareTimeline({
+                    title: shareTitle,
+                    link: lineLink,
+                    imgUrl: imgUrl,
+                    success: function () {
+                        // 用户确认分享后执行的回调函数
+                        // alert('分享成功');
+                    },
+                    cancel: function () {
+                        // 用户取消分享后执行的回调函数
+                    }
+                });
+                wx.onMenuShareAppMessage({
+                    title: shareTitle,
+                    desc: descContent,
+                    link: lineLink,
+                    imgUrl: imgUrl,
+                    success: function () {
+                        // 用户确认分享后执行的回调函数
+                        // alert('分享成功');
+                    },
+                    cancel: function () {
+                        // 用户取消分享后执行的回调函数
+                    }
+                });
+                wx.onMenuShareQQ({
+                    title: shareTitle,
+                    desc: descContent,
+                    link: lineLink,
+                    imgUrl: imgUrl,
+                    success: function () {
+                        // 用户确认分享后执行的回调函数
+                        // alert('分享成功');
+                    },
+                    cancel: function () {
+                        // 用户取消分享后执行的回调函数
+                    }
+                });
+                wx.onMenuShareWeibo({
+                    title: shareTitle,
+                    desc: descContent,
+                    link: lineLink,
+                    imgUrl: imgUrl,
+                    success: function () {
+                        // 用户确认分享后执行的回调函数
+                        // alert('分享成功');
+                    },
+                    cancel: function () {
+                        // 用户取消分享后执行的回调函数
+                    }
+                });
+                wx.onMenuShareQZone({
+                    title: shareTitle,
+                    desc: descContent,
+                    link: lineLink,
+                    imgUrl: imgUrl,
+                    success: function () {
+                        // 用户确认分享后执行的回调函数
+                        // alert('分享成功');
+                    },
+                    cancel: function () {
+                        // 用户取消分享后执行的回调函数
+                    }
+                });
+                wx.error(function(res){
+                    // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+                    console.log("errorMSG:"+JSON.stringify(res));
+                });
+            });
+        </script>
+    $if signPackage and not QNOBJ:
+        <script type="text/javascript">
+            wx.config({
+                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+                timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+                nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+                signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+                jsApiList: [
+                    'checkJsApi',
+                    'hideAllNonBaseMenuItem'
+                ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+            });
+            wx.ready(function () {
+                wx.hideAllNonBaseMenuItem();
+                wx.error(function(res){
+                    console.log("errorMSG:"+JSON.stringify(res));
+                });
+            });
+        </script>
+</body>
+</html>

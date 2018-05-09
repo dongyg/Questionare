@@ -1,0 +1,192 @@
+$def with (pagedata={})
+$code:
+    #预览抽奖
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    QNLST = pagedata.get('QNLST')
+    random_value = pagedata.get('r','')
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>预览抽奖</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-metro.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/uniform/css/uniform.default.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.qs.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            预览抽奖
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+
+                    </div>
+                </div>
+            <br>
+            <div class="accordion" id="accordion1">
+                $for QNOBJ in QNLST:
+                    <div class="accordion-group" id="group_$QNOBJ.QN_ID">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_$QNOBJ.QN_ID" style="padding-right: 40px;">
+                            <i class="$('icon-question-sign' if not QNOBJ.ISSELF else 'icon-heart-empty')"></i> $(QNOBJ.QN_TITLE)（$get_status_title(QNOBJ.QN_STATUS)）
+                            </a>
+                            <div class="btn-group edit">
+                                <a class="btn" href="#" data-toggle="dropdown"><i class="icon-reorder"></i></a>
+                                <ul class="dropdown-menu" style="left:-122px;">
+                                    <li><a href="javascript:clickViewStat('$QNOBJ.QN_ID');"><i class="icon-bar-chart"></i> 查看统计结果</a></li>
+                                    <li><a href="javascript:clickFinishLottery('$QNOBJ.QN_ID');"><i class="icon-foursquare"></i> 直接终止问卷</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="collapse_$QNOBJ.QN_ID" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                                <p>奖品：$QNOBJ.PRIZE_TITLE - 价值：$QNOBJ.PRIZE_VALUE $('（支持匿名领奖）' if QNOBJ.PRIZE_SEND==0 else '')</p>
+                                <p>发布时间：$get_yyyy_mm_dd(QNOBJ.INPUT_TIME)</p>
+                                <p>回收份数：$QNOBJ.NUM_VOTE 份。抽奖号个数：$QNOBJ.NUM_LOTTERY</p>
+                                <p>结束时间：$get_yyyy_mm_dd(QNOBJ.END_DATE)。最近答卷时间：$QNOBJ.LAST_TIME</p>
+                            $if QNOBJ.get('PRELOTT',[]):
+                                <table class="table table-bordered table-hover"><tr><td>日期</td><td>行情</td><td>WINNO</td><td>FSID</td><td>BINGO</td><td>GOTCHA</td></tr>
+                            $for pre in QNOBJ.get('PRELOTT',[]):
+                                <tr><td>$pre.HQRQ</td><td>$pre.HQCJJE</td><td>$pre.WINNO</td><td>$pre.get('FSID')</td>
+                                <td>$:('<i class="icon-check"></i>' if pre.BINGO else '')<button class="btn mini" onclick="clickTakeThis('$QNOBJ.QN_ID',$pre.HQRQ,0)">TK</button></td>
+                                <td>$:(pre.GOTCHA+'''<button class="btn mini" onclick="clickTakeThis('%s',%d,%d)">TK</button>'''%(QNOBJ.QN_ID,pre.HQRQ,pre.GOTADD) if pre.has_key('GOTCHA') else '')</td>
+                                </tr>
+                            $if QNOBJ.get('PRELOTT',[]):
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+                <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+                <p class="weui-toast__content" id="toastMessage">已完成</p>
+            </div>
+        </div>
+        <!--end toast-->
+        <!--BEGIN dialog1-->
+        <div class="js_dialog" id="iosDialog1" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="confirmTitle"></strong></div>
+                <div class="weui-dialog__bd" id="confirmMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog1-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/bootstrap.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/uniform/jquery.uniform.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+        });
+        var clickTakeThis = function(qnid,hqrq,addnum) {
+            if (confirm("确认要采用此方案吗？")) {
+                jQuery.ajax({
+                    url: '/admin/prelottery',
+                    type: "POST",
+                    data: {'fsid':'$(FSOBJ.FS_ID)','r':'$random_value','qnid':qnid,'hqrq':hqrq,'addnum':addnum},
+                    async: false,
+                    beforeSend: function() {},
+                    success: function(retval) {
+                        var data = JSON.parse(retval);
+                        if (data.success) {
+                            showDialogMessage('操作成功');
+                        } else if (data.error) {
+                            showDialogMessage(data.error)
+                        } else {
+                            showDialogMessage(retval)
+                            // showDialogMessage('发生未知错误')
+                        }
+                    },
+                    error: ajaxErrorHandle
+                });
+            };
+        }
+        var clickViewStat = function(qnid) {
+            document.location.href = "/stview?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid="+qnid;
+        }
+        var clickFinishLottery = function(qnid) {
+            if (confirm("确认要终止问卷吗？")) {
+                jQuery.ajax({
+                    url: '/admin/endlottery',
+                    type: "POST",
+                    data: {'fsid':'$(FSOBJ.FS_ID)','r':'$random_value','qnid':qnid},
+                    async: false,
+                    beforeSend: function() {},
+                    success: function(retval) {
+                        var data = JSON.parse(retval);
+                        if (data.success) {
+                            showDialogMessage('操作成功');
+                        } else if (data.error) {
+                            showDialogMessage(data.error)
+                        } else {
+                            showDialogMessage(retval)
+                            // showDialogMessage('发生未知错误')
+                        }
+                    },
+                    error: ajaxErrorHandle
+                });
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,465 @@
+$def with (pagedata={})
+$code:
+    #设置问卷题目（有偿和普通问卷共用）
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    QNOBJ = pagedata.get('QNOBJ')
+    random_value = pagedata.get('r','')
+    QN_canmodi = bool(QNOBJ and QNOBJ.QN_STATUS<2)
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>设置问卷题目</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-metro.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/uniform/css/uniform.default.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.qs.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    .accordion-inner .btn {margin-top: 1px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    /*修改bootstrap中对input和select的样式使其保持weui的样式*/
+    select,
+    input[type="text"] {
+        display: inherit;
+        padding: 0;
+        margin-bottom: inherit;
+        vertical-align: inherit;
+        -webkit-border-radius: inherit;
+        -moz-border-radius: inherit;
+        border-radius: inherit;
+        /*weui的样式*/
+        width: 100%;
+        border: 0;
+        outline: 0;
+        -webkit-appearance: none;
+        background-color: transparent;
+        font-size: inherit;
+        color: inherit;
+        height: 1.41176471em;
+        line-height: 1.41176471
+    }
+    input[type="text"] {
+        -webkit-box-shadow: inherit;
+        -moz-box-shadow: inherit;
+        box-shadow: inherit;
+        -webkit-transition: inherit;
+        -moz-transition: inherit;
+        -o-transition: inherit;
+        transition: inherit;
+    }
+    input[type="text"]:focus {
+        border-color: inherit;
+        -webkit-box-shadow: inherit;
+        -moz-box-shadow: inherit;
+        box-shadow: inherit)
+    }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            设置问卷题目
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+
+                    </div>
+                </div>
+
+            <div class="weui-cells__title" style="text-align: center;">
+                $(QNOBJ.QN_TITLE if QNOBJ else '问卷不存在')
+            </div>
+            <input type="hidden" id="olditems" name="olditems" value="">
+        $if QNOBJ:
+            <form action="/rst/question" method="POST" class="form-horizontal" id="theform">
+                <input type="hidden" id="fsid" name="fsid" value="$(FSOBJ.FS_ID)">
+                <input type="hidden" id="r" name="r" value="$random_value">
+                <input type="hidden" id="qnid" name="qnid" value="$(QNOBJ.QN_ID if QNOBJ else '')">
+                <input type="hidden" id="allitem" name="allitem" value="">
+            </form>
+            <div class="accordion" id="accordion1">
+            </div>
+            <!-- 新建和编辑问题 -->
+            $if QN_canmodi:
+                <div class="weui-btn-area" id="divAskBtnContainer">
+                    <button class="btn" onclick="clickAddAsk();" id="btnAddAsk" style="display:inline-block;width:48%;"><i class="icon-plus"></i> 添加新题目</button>
+                    <button class="btn" onclick="clickSelAsk();" id="btnSelAsk" style="display:inline-block;width:48%;margin-left:2%;float:right;"><i class="icon-plus"></i> 从模板添加</button>
+                </div>
+            <div id="divOptionContainer" style="display:none;">
+                <div class="weui-cells" id="divAddAsk">
+                    <div class="weui-cell weui-cell_select weui-cell_select-before" id="divAskTitle">
+                        <div class="weui-cell__hd">
+                            <select class="weui-select" name="select2" id="inputAskType" onchange="changeAskType();">
+                                <option value="R">单选题</option>
+                                <option value="RA">单标签</option>
+                                <option value="C">多选题</option>
+                                <option value="CH">多标签</option>
+                                <option value="B">是否题</option>
+                                <option value="S">五星题</option>
+                                <option value="T">文本</option>
+                            </select>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" type="text" autocomplete="off" id="inputAskTitle" placeholder="请输入问题"/>
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_select weui-cell_select-before" name="divOption" style="display:flex;">
+                        <div class="weui-cell__hd">
+                            <div style="height:44px;width:105px;display:inline;">&nbsp;</div> <!-- 保证cell高度 -->
+                            <button onclick="clickAddOption(this);" class="btn" style="margin:5px 5px 5px 4px;"><i class="icon-plus"></i></button>
+                            <button onclick="clickDelOption(this);" class="btn" style="margin:5px 5px 5px 0px;"><i class="icon-trash"></i></button>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" type="text" autocomplete="off" name="inputOption" placeholder="请输入选项"/>
+                        </div>
+                    </div>
+                </div>
+                <br>
+                <button class="weui-btn weui-btn_primary" onclick="clickSaveAsk();" id="btnSaveAsk">确定</button>
+                <button class="weui-btn weui-btn_default" onclick="clickCancelAsk();" id="btnCancelAsk">取消</button>
+            </div>
+            <!-- 全部完成 -->
+            $if QN_canmodi:
+                <div class="weui-btn-area" id="divFinish">
+                    <button class="weui-btn weui-btn_primary" onclick="clickGoOn();" id="btnFinish">下一步</button>
+                    <button class="weui-btn weui-btn_default" onclick="clickBack();" id="btnBack">返回设置问卷信息</button>
+                </div>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+                <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+                <p class="weui-toast__content" id="toastMessage">已完成</p>
+            </div>
+        </div>
+        <!--end toast-->
+        <!--BEGIN dialog1-->
+        <div class="js_dialog" id="iosDialog1" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="confirmTitle"></strong></div>
+                <div class="weui-dialog__bd" id="confirmMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog1-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/bootstrap.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/uniform/jquery.uniform.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            loadQuestion();
+        });
+        var loadQuestion = function() {
+            jQuery.ajax({
+                url: '/rst/question?qnid=$(QNOBJ.QN_ID if QNOBJ else '')',
+                type: "GET",
+                async: false,
+                beforeSend: function() {},
+                success: function(retval) {
+                    jQuery('#olditems').val(retval);
+                    all_items = JSON.parse(retval);
+                    reloadAllItems('#accordion1',all_items,$:('true' if QN_canmodi else 'false'));
+                },
+                error: ajaxErrorHandle
+            });
+        }
+        var clickStar = function(askno,optionno) {
+            clickRadio(askno, optionno)
+        }
+        var clickBoolean = function(askno,optionno) {
+            clickRadio(askno, optionno)
+        }
+        var clickRadio = function(askno,optionno) {
+            jQuery('[name="ask'+askno+'"]').each(function(){
+                jQuery(this).attr('class','btn');
+            })
+            jQuery('#ask'+askno+'_op'+optionno).attr('class','btn green');
+        }
+        var clickCheck = function(askno,optionno) {
+            var title = jQuery('#ask'+askno+'_op'+optionno).attr('class');
+            if (title.indexOf('green')>=0) {
+                jQuery('#ask'+askno+'_op'+optionno).attr('class','btn');
+            } else {
+                jQuery('#ask'+askno+'_op'+optionno).attr('class','btn green');
+            }
+        }
+        var all_items = [{"QI_TYPE":"R","QI_TITLE":"age","QI_OPTION":["10","20","30"]},{"QI_TYPE":"C","QI_TITLE":"hobby","QI_OPTION":["PingPang","Basketball","Running"]}];
+        var editing = -1;
+        var changeAskType = function() {
+            var t = jQuery('#inputAskType').val();
+            if (t=='B' || t=='S' || t=='T') {
+                jQuery('[name="divOption"]').each(function(){
+                    jQuery(this).css('display','none');
+                })
+            } else {
+                jQuery('[name="divOption"]').each(function(){
+                    jQuery(this).css('display','flex');
+                })
+            }
+            if (jQuery('[name="divOption"]').length==0) {
+                clickAddOption()
+            }
+            jQuery('#inputAskTitle').focus();
+        }
+        var clickSelAsk = function(){
+            document.location.href = 'qstmpl?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid=$(QNOBJ.QN_ID if QNOBJ else '')';
+        }
+        var clickAddAsk = function(){
+            editing = -1;
+            // jQuery('.collapse').collapse('hide'); //不太灵
+            jQuery('[name="divOption"]').each(function(idx,ele){
+                if (idx>0) {
+                    jQuery(this).remove();
+                };
+            })
+            jQuery('#inputAskTitle').val('');
+            jQuery('[name="inputOption"]').each(function(){
+                jQuery(this).val('');
+            })
+            jQuery('#divFinish').css('display','none');
+            jQuery('#divAskBtnContainer').css('display','none');
+            jQuery('#divOptionContainer').css('display','block');
+            jQuery('#inputAskTitle').focus();
+        }
+        var clickEditAsk = function(idx){
+            editing = idx;
+            var item = all_items[idx];
+            // jQuery('.collapse').collapse('hide'); //不太灵
+            jQuery('[name="divOption"]').each(function(idx,ele){
+                jQuery(this).remove();
+            })
+            jQuery('#inputAskTitle').val(item.QI_TITLE);
+            jQuery('#inputAskType').val(item.QI_TYPE);
+            if (item.QI_TYPE=='R' || item.QI_TYPE=='RA' || item.QI_TYPE=='C' || item.QI_TYPE=='CH') {
+                for (var i = 0; i < item.QI_OPTION.length; i++) {
+                    clickAddOption(null,item.QI_OPTION[i])
+                }
+            }
+            jQuery('#divFinish').css('display','none');
+            jQuery('#divAskBtnContainer').css('display','none');
+            jQuery('#divOptionContainer').css('display','block');
+            jQuery('#inputAskTitle').focus();
+        }
+        var clickDelAsk = function(idx){
+            showConfirmMessage('提示',"确认删除这个题目吗？",function(){
+                all_items = [].concat( all_items.slice(0,idx),all_items.slice(idx+1) );
+                reloadAllItems('#accordion1',all_items,$:('true' if QN_canmodi else 'false'));
+                clickGoOn(true);
+            });
+        }
+        var clickMoveAsk = function(idx){
+            var pos = prompt("移到第几个？","")
+            if (pos==null) {
+            } else {
+                if (isNaN(pos) || pos<=0 || pos>all_items.length) {
+                    showDialogMessage('请输入 1-'+all_items.length+' 的整数');
+                    return;
+                };
+                if (pos!=null && pos!="" && pos!=idx+1 && pos>0 && pos<=all_items.length) {
+                    pos = pos-1; //如果往后移，元素取出后pos应该减1。如果向前移，输入值是1开始编号，插入到数组中的位置应该减1
+                    var item = all_items[idx];
+                    all_items = [].concat( all_items.slice(0,idx), all_items.slice(idx+1) );
+                    all_items.splice(pos,0,item);
+                    reloadAllItems('#accordion1',all_items,$:('true' if QN_canmodi else 'false'));
+                }
+            }
+        }
+        var clickSaveAsk = function(){
+            var check = true;
+            var options = [];
+            if (jQuery('#inputAskTitle').val()=='') {
+                showDialogMessage('请填写题目内容',function(){
+                    jQuery('#inputAskTitle').focus();
+                });
+                check = false;
+                return;
+            } else if (jQuery('#inputAskTitle').val().length>120) {
+                showDialogMessage('题目最长不能超过120个字！',function(){
+                    jQuery('#inputAskTitle').focus();
+                });
+                check = false;
+                return;
+            };
+            if (jQuery('#inputAskType').val()=='R' || jQuery('#inputAskType').val()=='RA' || jQuery('#inputAskType').val()=='C' || jQuery('#inputAskType').val()=='CH') {
+                jQuery('[name="inputOption"]').each(function(){
+                    if (jQuery(this).val()=='') {
+                        var curr=jQuery(this);
+                        showDialogMessage('请填写选项内容',function(curr){
+                            jQuery(curr).focus();
+                        });
+                        check = false;
+                        return;
+                    } else {
+                        options.push(jQuery(this).val());
+                    }
+                })
+            } else if (jQuery('#inputAskType').val()=='S') {
+                options = [1,2,3,4,5];
+            } else if (jQuery('#inputAskType').val()=='B') {
+                options = [1,0,null];
+            }
+            if (check) {
+                var item = {'QI_TYPE':jQuery('#inputAskType').val(),'QI_TITLE':jQuery('#inputAskTitle').val(),'QI_OPTION':options}
+                if (editing>=0 && editing<all_items.length) {
+                    all_items = [].concat( all_items.slice(0,editing),item,all_items.slice(editing+1) )
+                } else {
+                    all_items.push(item);
+                    editing = all_items.length-1;
+                }
+                jQuery('#divFinish').css('display','block');
+                jQuery('#divAskBtnContainer').css('display','block');
+                jQuery('#divOptionContainer').css('display','none');
+                reloadAllItems('#accordion1',all_items,$:('true' if QN_canmodi else 'false'));
+                // jQuery('#collapse_'+editing).collapse('show');
+                showToastSuccess('添加题目成功');
+                clickGoOn(true);
+            };
+        }
+        var clickCancelAsk = function(){
+            jQuery('#divFinish').css('display','block');
+            jQuery('#divAskBtnContainer').css('display','block');
+            jQuery('#divOptionContainer').css('display','none');
+        }
+
+        var clickAddOption = function(el,value){
+            var newOption =
+                '<div class="weui-cell weui-cell_select weui-cell_select-before" name="divOption">\
+                    <div class="weui-cell__hd">\
+                        <div style="height:44px;width:105px;display:inline;">&nbsp;</div>\
+                        <button onclick="clickAddOption(this);" class="btn" style="margin:5px 5px 5px 4px;"><i class="icon-plus"></i></button>\
+                        <button onclick="clickDelOption(this);" class="btn" style="margin:5px 5px 5px 0px;"><i class="icon-trash"></i></button>\
+                    </div>\
+                    <div class="weui-cell__bd">\
+                        <input class="weui-input" type="text" autocomplete="off" name="inputOption" placeholder="请输入选项" value="'+(value || '')+'"/>\
+                    </div>\
+                </div>';
+            if (el) {
+                jQuery(el).parent().parent().after(newOption);
+                jQuery(el).parent().parent().next().children().last().children()[0].focus(); //拿到新添加的选项的input设置输入焦点
+            } else {
+                jQuery('#divAddAsk').append(newOption);
+                jQuery('[name="inputOption"]').last().focus();
+            }
+        }
+        var clickDelOption = function(el){
+            if (jQuery('[name="divOption"]').length>1) {
+                jQuery(el).parent().parent().remove();
+            } else {
+                showDialogMessage('至少保留一个选项！')
+            }
+        }
+        var clickBack = function() {
+            document.location.href = 'createqs?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid=$(QNOBJ.QN_ID if QNOBJ else '')';
+        }
+        var clickGoOn = function(silence){
+            // silence为true时仅保存
+            var check = true;
+            if (!silence && all_items.length==0) {
+                showDialogMessage('请先添加问卷题目');
+                check = false;
+                return;
+            }
+            if (!silence && jQuery('#olditems').val()==JSON.stringify(all_items)) {
+                document.location.href = 'predeploy?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid=$(QNOBJ.QN_ID if QNOBJ else '')';
+                return;
+            }
+            if (all_items.length>0) {
+                jQuery('#allitem').val(JSON.stringify(all_items));
+                jQuery.ajax({
+                    url: '/rst/question',
+                    type: "POST",
+                    async: false,
+                    data: jQuery('#theform').serialize(),
+                    beforeSend: function() {},
+                    success: function(retval) {
+                        jQuery('#olditems').val(jQuery('#allitem').val());
+                        var data = JSON.parse(retval);
+                        if (data.success) {
+                            if (!silence) {
+                                document.location.href = data.success;
+                            }
+                        } else if (data.error) {
+                            showDialogMessage(data.error)
+                        } else {
+                            showDialogMessage('发生未知错误')
+                        }
+                    },
+                    error: ajaxErrorHandle
+                });
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'hideAllNonBaseMenuItem'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+            wx.error(function(res){
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>

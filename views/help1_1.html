@@ -1,0 +1,316 @@
+$def with (pagedata={})
+$code:
+    #通用创建问卷-有奖问卷-填写奖品信息
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    QNOBJ = pagedata.get('QNOBJ')
+    random_value = pagedata.get('r','')
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>填写奖品信息</title>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    .accordion-inner .btn {margin-top: 1px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body>
+    <div class="page" id="pageBody">
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            填写奖品信息
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+
+                    </div>
+                </div>
+            <form id="theform" enctype="multipart/form-data" >
+
+            <input type="hidden" id="fsid" name="fsid" value="$(FSOBJ.FS_ID)">
+            <input type="hidden" id="r" name="r" value="$random_value">
+            <input type="hidden" id="qnid" name="qnid" value="$(QNOBJ.QN_ID if QNOBJ else '')">
+
+            <div class="weui-cells weui-cells_form">
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <input class="weui-input" type="text" autocomplete="off" id="PRIZE_TITLE" name="PRIZE_TITLE" placeholder="一句话描述奖品" value="$(QNOBJ.PRIZE_TITLE if QNOBJ else '')"/>
+                    </div>
+                </div>
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <input class="weui-input" type="number" autocomplete="off" id="PRIZE_VALUE" name="PRIZE_VALUE" pattern="[0-9]*" placeholder="奖品价值人民币" value="$(QNOBJ.PRIZE_VALUE if QNOBJ and QNOBJ.PRIZE_VALUE else '')"/>
+                    </div>
+                </div>
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <div class="weui-uploader">
+                            <div class="weui-uploader__hd">
+                                <p class="weui-uploader__title">奖品图文描述(宽720像素)，单个不超过1M</p>
+                                <div class="weui-uploader__info"><span id="uploaderCount3">$(len(QNOBJ.get('IMGDETAIL_URLS',[])) if QNOBJ else 0)</span>/5</div>
+                            </div>
+                            <div class="weui-uploader__bd">
+                                <input type="hidden" id="remove_img3" name="remove_img3" value="" />
+                                <ul class="weui-uploader__files" id="uploaderFiles3">
+                                $if QNOBJ and QNOBJ.get('IMGDETAIL_URLS'):
+                                    $for no,url in QNOBJ['IMGDETAIL_URLS']:
+                                        <li class="weui-uploader__file" style="background-image:url($url)" id="$no" name="liImage"></li>
+                                </ul>
+                                <div class="weui-uploader__input-box" style="display:$('none' if QNOBJ and len(QNOBJ.get('IMGDETAIL_URLS',[]))>=5 else 'block')">
+                                    <input id="uploaderInput3" class="weui-uploader__input" type="file" accept="image/*" multiple />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="weui-cell weui-cell_switch">
+                    <div class="weui-cell__bd">自行寄送奖品</div>
+                    <div class="weui-cell__ft">
+                        <label for="PRIZE_SEND" class="weui-switch-cp">
+                            <input id="PRIZE_SEND" name="PRIZE_SEND" class="weui-switch-cp__input" type="checkbox" onchange="changePrizeSend()" value="1" $:('checked="checked"' if QNOBJ and QNOBJ.PRIZE_SEND else '') />
+                            <div class="weui-switch-cp__box"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-cells__tips">问卷发布前，需要支付等价于奖品价值的保证金。保证金的作用是保障中奖权益，支持用户匿名领奖。选择自行寄送奖品的话，用户确认收到奖品后可全额退还保证金，不产生任何费用</div>
+            <div class="weui-gallery" id="gallery">
+                <span class="weui-gallery__img" id="galleryImg"></span>
+                <div class="weui-gallery__opr">
+                    <a href="javascript:removeImage()" class="weui-gallery__del">
+                        <i class="weui-icon-delete weui-icon_gallery-delete"></i>
+                    </a>
+                </div>
+            </div>
+            </form>
+
+            <div class="weui-btn-area">
+                <button class="weui-btn weui-btn_primary" onclick="clickGoOn();" id="btnContinue">下一步</button>
+            </div>
+            <div class="weui-btn-area">
+                <a class="weui-btn weui-btn_default" href="predeploy?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid=$(QNOBJ.QN_ID if QNOBJ else '')" id="btnBack">返回选择其它问卷类型</a>
+            </div>
+        </div>
+    </div>
+    <!-- loading toast -->
+    <div id="loadingToast" style="display:none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p class="weui-toast__content" id="toastMsgLoading">数据加载中</p>
+        </div>
+    </div>
+    <!--BEGIN toast-->
+    <div id="toast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+            <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+            <p class="weui-toast__content" id="toastMessage">已完成</p>
+        </div>
+    </div>
+    <!--end toast-->
+    <!--BEGIN dialog1-->
+    <div class="js_dialog" id="iosDialog1" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="confirmTitle"></strong></div>
+            <div class="weui-dialog__bd" id="confirmMessage"></div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            </div>
+        </div>
+    </div>
+    <!--END dialog1-->
+    <!--BEGIN dialog2-->
+    <div class="js_dialog" id="iosDialog2" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__bd" id="dialogMessage"></div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+            </div>
+        </div>
+    </div>
+    <!--END dialog2-->
+    <input type="hidden" id="oldval">
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/jquery.blockui.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            initUniform();
+            jQuery('#oldval').val(JSON.stringify(jQuery('#theform').serialize()));
+        });
+        var setFileBase64 = function(file,saverid) {
+            var reader = new FileReader();
+            reader.onload = function (e) {jQuery(saverid).val(e.target.result);};
+            reader.readAsDataURL(file);
+        }
+        var appendFileBase64 = function(file,saverid) {
+            var reader = new FileReader();
+            reader.onload = function (e) {var arr=jQuery(saverid).val() || []; arr.push(e.target.result); jQuery(saverid).val(JSON.stringify(arr));};
+            reader.readAsDataURL(file);
+        }
+        $$(function(){
+            var tmpl = '<li class="weui-uploader__file" style="background-image:url(#url#)" name="liImage"></li>',
+                $$gallery = $$("#gallery"), $$galleryImg = $$("#galleryImg"),
+                $$uploaderInput3 = $$("#uploaderInput3"),
+                $$uploaderFiles3 = $$("#uploaderFiles3")
+                ;
+            $$uploaderInput3.on("change", function(e){
+                var src, url = window.URL || window.webkitURL || window.mozURL, files = e.target.files;
+                var len = Math.min(files.length,(5-$$uploaderFiles3.children().length));
+                for (var i = 0; i < len; ++i) {
+                    var file = files[i];
+                    if (file.size<1*1024*1024) {
+                        if (url) {
+                            src = url.createObjectURL(file);
+                        } else {
+                            src = e.target.result;
+                        }
+                        var key = src.substr(src.length-36,35);
+                        tmpl = '<li class="weui-uploader__file" style="background-image:url(#url#)" name="liImage"><input type="hidden" id="'+key+'" name="IMG3" /></li>';
+                        $$uploaderFiles3.append($$(tmpl.replace('#url#', src)));
+                        appendFileBase64(file,'#'+key);
+                    } else {
+                        showDialogMessage('文件'+file.name+'大于1M，单个文件要小于1M，大了很费流量的哦！建议使用电脑端的微信，电脑制作图片上传、编辑问卷更方便！')
+                    }
+                }
+                jQuery('#uploaderCount3').text($$uploaderFiles3.children().length);
+                if ($$uploaderFiles3.children().length>=5) {
+                    $$uploaderInput3.parent().css('display','none');
+                };
+            });
+            $$uploaderFiles3.on("click", "li", function(){
+                $$galleryImg.attr("style", this.getAttribute("style"));
+                $$gallery.fadeIn(100);
+            });
+
+            $$gallery.on("click", function(){
+                $$gallery.fadeOut(100);
+            });
+        });
+        var removeImage = function() {
+            var style = jQuery('#galleryImg').attr("style");
+            jQuery('[name="liImage"]').each(function(){
+                if (jQuery(this).attr('style')==style) {
+                    var uploader = jQuery(this).parent().attr('id');
+                    if (uploader=='uploaderFiles3') {
+                        if (jQuery(this).parent().children().length<=5) {
+                            jQuery(this).parent().next().css('display','block');
+                        }
+                    };
+                    if (jQuery(this).attr('id')) {
+                        var rimg3 = JSON.parse(jQuery('#remove_img3').val() || '[]');
+                        rimg3.push(jQuery(this).attr('id'));
+                        jQuery('#remove_img3').val(JSON.stringify(rimg3));
+                    }
+                    jQuery(this).remove();
+                    jQuery('#uploaderCount3').text(jQuery('#uploaderFiles3').children().length);
+                };
+            });
+        }
+        var clickGoOn = function () {
+            if (!jQuery('#PRIZE_TITLE').val()) {
+                showDialogMessage('请输入奖品描述',function() {
+                    jQuery('#PRIZE_TITLE').focus();
+                });
+                return false;
+            } else if (jQuery('#PRIZE_TITLE').val().length>64) {
+                showDialogMessage('奖品描述最多64个字！',function(){
+                    jQuery('#PRIZE_TITLE').focus();
+                });
+                return false;
+            }
+            if (!jQuery('#PRIZE_VALUE').val()) {
+                showDialogMessage('请输入奖品价值',function(){
+                    jQuery('#PRIZE_VALUE').focus();
+                });
+                return false;
+            };
+            var noImg3 = (!jQuery('[name="IMG3"]').val() && jQuery.trim(jQuery('#uploaderFiles3').html())=='');
+            if (noImg3) {
+                showDialogMessage('缺少奖品描述图片<br>请至少提交一个图片！');
+                return false;
+            }
+            if (JSON.stringify(jQuery('#theform').serialize())==jQuery('#oldval').val()) {
+                document.location.href = '/jsapi/paid2?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid=$(QNOBJ.QN_ID if QNOBJ else '')';
+                return;
+            };
+            jQuery.ajax({
+                url: '/rst/modiqs',
+                type: "POST",
+                async: true,
+                data: jQuery('#theform').serialize(),
+                beforeSend: function() {blockUI('#pageBody')},
+                success: function(retval) {
+                    var data = JSON.parse(retval);
+                    if (data.success) {
+                        jQuery('#oldval').val(JSON.stringify(jQuery('#theform').serialize()));
+                        document.location.href = data.success;
+                    } else if (data.error) {
+                        showDialogMessage(data.error)
+                    } else {
+                        showDialogMessage('发生未知错误')
+                    }
+                },
+                complete: function() {unblockUI('#pageBody')},
+                error: ajaxErrorHandle
+            });
+        }
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'hideAllNonBaseMenuItem'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+            wx.error(function(res){
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>

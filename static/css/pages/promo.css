@@ -1,0 +1,66 @@
+/***
+Promo Page
+***/
+
+.promo-page {
+  padding-left: 0;
+  padding-right: 0;
+  /*min-height: 300px;*/
+}
+
+.promo-page h1 {
+  font-size: 50px;
+  line-height: 60px;
+}
+
+.promo-page h2 {
+  font-size: 40px;
+  line-height: 50px;
+}
+
+.promo-page .btn.xlarge {
+  font-size: 22px;
+  padding: 7px 25px;
+  margin: 5px 0;
+}
+
+.promo-page input.m-wrap {
+  background: #fff;
+}
+
+/*page row options*/
+
+.promo-page .block-transparent {
+  /*min-height: 100px;*/
+  padding: 20px 20px 20px 20px;
+}
+
+.promo-page .block-grey {
+  /*min-height: 100px;*/
+  padding: 0px 20px 20px 20px;
+  background: #eeedf2;
+}
+
+.promo-page .block-yellow {
+  /*min-height: 100px;*/
+  padding: 0px 20px 20px 20px;
+  background: #ffd800;
+}
+
+.promo-page .block-blue {
+  /*min-height: 100px;*/
+  padding: 0px 20px 20px 20px;
+  background: #6da5fe;
+}
+
+.promo-page .block-red {
+  /*min-height: 100px;*/
+  padding: 0px 20px 20px 20px;
+  background: #e86763;
+}
+
+.promo-page .block-footer {
+  padding: 0px 20px 20px 20px;
+  background: #eeedf2;
+}
+

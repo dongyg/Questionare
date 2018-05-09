@@ -1,0 +1,341 @@
+$def with (pagedata={})
+$code:
+    #查看问卷统计结果。用户基本信息的统计只针对问卷发布人显示
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    QNOBJ = pagedata.get('QNOBJ')
+    TPOBJ = pagedata.get('TPOBJ')
+    random_value = pagedata.get('r','')
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>$QNOBJ.QN_TITLE</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-metro.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/uniform/css/uniform.default.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.qs.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            $QNOBJ.QN_TITLE
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+                    </div>
+                </div>
+
+            <div class="weui-cells__title" style="text-align: center;">
+                <h4>
+                    $QNOBJ.QN_TITLE
+                </h4>
+                <p class="page__desc" style="text-align: center;">回收份数：$QNOBJ.NUM_VOTE</p>
+            </div>
+            <form action="/rst/answer" method="POST" class="form-horizontal" id="theform">
+                <input type="hidden" id="fsid" name="fsid" value="$(FSOBJ.FS_ID if FSOBJ else '')">
+                <input type="hidden" id="r" name="r" value="$(pagedata.get('r') or '')">
+                <input type="hidden" id="qnid" name="qnid" value="$(QNOBJ.QN_ID if QNOBJ else '')">
+                <input type="hidden" id="AN_CONTENT" name="AN_CONTENT" value="">
+            </form>
+            <div class="weui-cells__title"><h5>问卷题目统计(可横屏查看)</h5></div>
+            <div class="accordion" id="accordion1">
+                <!-- 题目统计容器 -->
+            </div>
+            $if FSOBJ.FS_ID==QNOBJ.FS_ID:
+                <hr>
+                <div class="weui-cells__title"><h5>基本信息统计</h5></div>
+                <div class="accordion" id="accordion2">
+                    <!-- 基本信息统计容器 -->
+                </div>
+            $if TPOBJ:
+                <p class="weui-msg__desc" style="text-align: center;">
+                    $:(u'%s<a href="/topic1?fsid=%s&r=%s&tpid=%s&refqn=%s">现在创建</a>'%(TPOBJ.QN_SUMMARY,FSOBJ.FS_ID,random_value,QNOBJ.TOPIC_QNID,QNOBJ.QN_ID))还可以再拿到一个红包呦！
+                </p>
+                <p>&nbsp;</p>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+                <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+                <p class="weui-toast__content" id="toastMessage">已完成</p>
+            </div>
+        </div>
+        <!--end toast-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/bootstrap.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/uniform/jquery.uniform.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/flot/jquery.flot.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/flot/jquery.flot.resize.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/flot/jquery.flot.pie.min.js"></script>
+    <script src="$static_host/static/flot/jquery.flot.stack.min.js"></script>
+    <script src="$static_host/static/flot/jquery.flot.categories.min.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            loadQnStat();
+        });
+        var convertAA = function(value) {
+            //将10进制数字转换为A-Z组成的26进制
+            var stc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            var retval = '';
+            intp = Math.floor(value / stc.length, 0);
+            remp = value % stc.length;
+            while (intp>0) {
+                retval = stc[remp]+retval;
+                remp = intp % stc.length;
+                intp = Math.floor(intp / stc.length, 0);
+            }
+            retval = stc[remp]+retval;
+            return retval;
+        }
+        var loadQnStat = function() {
+            jQuery.ajax({
+                url: '/rst/qnstat?qnid=$QNOBJ.QN_ID&fsid=$(FSOBJ.FS_ID)&r=$random_value',
+                type: "GET",
+                async: false,
+                beforeSend: function() {},
+                success: function(retval) {
+                    var data = JSON.parse(retval);
+                    ans_items = data[0];
+                    baseinfo_items = data[1];
+                    loadAllCharts();
+                },
+                error: ajaxErrorHandle
+            });
+        }
+        var ans_items = [{"QI_TITLE": "你是第1次使用问卷调查大师吗？","pldata": [{"data": 2,"label": "是"},{"data": 0,"label": "否"},{"data": 0,"label": "不确定"}],"QI_TYPE": "B"},{"QI_TITLE": "你每天使用手机的时间大约有多少？","pldata": [{"data": 1,"label": "2个小时以下"},{"data": 1,"label": "2-4个小时"},{"data": 0,"label": "4-6个小时"},{"data": 0,"label": "6-8个小时"},{"data": 0,"label": "8个小时以上"}],"QI_TYPE": "R"},{"QI_TITLE": "你使用手机经常做哪些事情？","pldata": [{"data": 1,"label": "看新闻"},{"data": 1,"label": "聊天交友"},{"data": 0,"label": "玩游戏"},{"data": 1,"label": "工作"},{"data": 1,"label": "购物"},{"data": 1,"label": "出行"},{"data": 0,"label": "金融"},{"data": 2,"label": "生活相关的许多事情"}],"QI_TYPE": "C"},{"QI_TITLE": "请给问卷调查大师从1星到5星打个分","pldata": [{"data": 0,"label": "1星"},{"data": 0,"label": "2星"},{"data": 0,"label": "3星"},{"data": 0,"label": "4星"},{"data": 2,"label": "5星"}],"QI_TYPE": "S"}];
+        var baseinfo_items = [];
+        var labelFormatter = function(label, series) {
+            // return "<div style='font-size:9pt;text-align:center; padding:2px; color:white;'>" + label + "<br/>" + series.data[0][1] +":"+ Math.round(series.percent) + "%</div>";
+            // return "<div style='font-size:9pt;text-align:center; padding:2px; color:white;'>" + series.data[0][1] +":"+ Math.round(series.percent) + "%</div>";
+            // return "<div style='font-size:9pt;text-align:center; padding:2px; color:white;'>" + label + "<br/>" + series.data[0][1] + "</div>";
+            return "<div style='font-size:9pt;text-align:center; padding:2px; color:white;'>" + Math.round(series.percent) + "%</div>";
+        }
+        var legendLabelFormatter = function(label, series) {
+            return '&nbsp;' + (label.length>10?label.substring(0,9)+'..':label) + ': ' + series.data[0][1];
+        }
+        var loadAllCharts = function(){
+            jQuery('#accordion1').html('');
+            jQuery.each(ans_items, function(index, item) {
+                var options = '';
+                if (item.QI_TYPE=='T') {
+                    jQuery.each(item.pldata, function(idx, opt) {
+                        options += convertAA(idx)+'. '+opt.label+'<br>';
+                    });
+                };
+                options += '<div id="chart_ans_'+index+'" class="chart" style="height:200px;"></div>';
+                jQuery('#accordion1').append('\
+                    <div class="accordion-group">\
+                        <div class="accordion-heading">\
+                            <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_'+index+'" id="a_ask_'+index+'" style="padding-right: 40px;">\
+                            <i class="icon-question-sign"></i> '+(index+1)+'.'+item.QI_TITLE+'\
+                            </a>\
+                        </div>\
+                        <div id="collapse_'+index+'" class="accordion-body collapse'+(index>=0?' in':'')+'">\
+                            <div class="accordion-inner">'+options+'</div>\
+                        </div>\
+                    </div>\
+                    ');
+                if (item.QI_TYPE=='R' || item.QI_TYPE=='RA' || item.QI_TYPE=='S' || item.QI_TYPE=='B') {
+                    jQuery.plot(jQuery("#chart_ans_"+index), item.pldata, {
+                            series: {
+                                pie: {
+                                    show: true,
+                                    radius: 1,
+                                    label: {
+                                        show: true,
+                                        radius: 3/4,
+                                        formatter: labelFormatter,
+                                        background: {
+                                            opacity: 0.5
+                                        }
+                                    }
+                                }
+                            },
+                            legend: {
+                                show: true,
+                                backgroundOpacity: 0,
+                                labelFormatter: legendLabelFormatter
+                            }
+                        });
+                } else if (item.QI_TYPE=='C' || item.QI_TYPE=='CH' || item.QI_TYPE=='T') {
+                    var data = [];
+                    jQuery.each(item.pldata, function(idx, opt) {
+                        if (item.QI_TYPE=='T') {
+                            data.push([convertAA(idx),opt.data]);
+                        } else if (item.QI_TYPE=='C' || opt.data>0) {
+                            data.push([(opt.label.length>10?opt.label.substring(0,9)+'..':opt.label),opt.data]);
+                        };
+                    });
+                    var plot = jQuery.plot("#chart_ans_"+index, [data], {
+                            series: {
+                                bars: {
+                                    show: true,
+                                    barWidth: 0.6,
+                                    lineWidth: 0,
+                                    align: "center",
+                                    fillColor: { colors: [ { opacity: 1.0 }, { opacity: 1.0 } ] }
+                                }
+                            },
+                            xaxis: {
+                                mode: "categories",
+                                tickLength: 0
+                            },
+                            yaxis: {
+                                tickDecimals: 0
+                            }
+                        });
+                } else if (item.QI_TYPE=='T') {
+                    var rawData = [];
+                    var ticks = [];
+                    jQuery.each(item.pldata, function(idx, opt) {
+                        rawData.push([opt.data,idx]);
+                        ticks.push([idx,opt.label]);
+                    });
+                    var dataSet = [{ label: item.QI_TITLE, data: rawData }];
+                    console.log(dataSet)
+                    var plot = jQuery.plot("#chart_ans_"+index, dataSet, {
+                            series: {
+                                bars: {
+                                    show: true
+                                }
+                            },
+                            bars: {
+                                horizontal: true,
+                                barWidth: 0.5,
+                                lineWidth: 0,
+                                align: "center",
+                                fillColor: { colors: [ { opacity: 1.0 }, { opacity: 1.0 } ] }
+                            },
+                            xaxis: {
+                                tickDecimals: 0,
+                                tickLength: 0
+                            },
+                            yaxis: {
+
+                                ticks: ticks
+                            }
+                        });
+                }
+            });
+            ////////////////////
+            $if FSOBJ.FS_ID==QNOBJ.FS_ID:
+                jQuery('#accordion2').html('');
+                jQuery.each(baseinfo_items, function(index, item) {
+                    var options = '<div id="chart_bi_'+index+'" class="chart" style="height:200px;"></div>';
+                    jQuery('#accordion2').append('\
+                        <div class="accordion-group">\
+                            <div class="accordion-heading">\
+                                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapse_bi_'+index+'" id="a_bi_'+index+'" style="padding-right: 40px;">\
+                                <i class="icon-question-sign"></i> '+(index+1)+'.'+item.QI_TITLE+'\
+                                </a>\
+                            </div>\
+                            <div id="collapse_bi_'+index+'" class="accordion-body collapse'+(index>=0?' in':'')+'">\
+                                <div class="accordion-inner">'+options+'</div>\
+                            </div>\
+                        </div>\
+                        ');
+                    if (item.QI_TYPE=='R' || item.QI_TYPE=='RA' || item.QI_TYPE=='S' || item.QI_TYPE=='B') {
+                        jQuery.plot(jQuery("#chart_bi_"+index), item.pldata, {
+                                series: {
+                                    pie: {
+                                        show: true,
+                                        radius: 1,
+                                        label: {
+                                            show: true,
+                                            radius: 3/4,
+                                            formatter: labelFormatter,
+                                            background: {
+                                                opacity: 0.5
+                                            }
+                                        }
+                                    }
+                                },
+                                legend: {
+                                    show: true,
+                                    backgroundOpacity: 0,
+                                    labelFormatter: legendLabelFormatter
+                                }
+                            });
+                    } else if (item.QI_TYPE=='C' || item.QI_TYPE=='CH' || item.QI_TYPE=='T') {
+                        var data = [];
+                        jQuery.each(item.pldata, function(idx, opt) {
+                            if (item.QI_TYPE=='C' || opt.data>0) {
+                                data.push([opt.label,opt.data]);
+                            };
+                        });
+                        var plot = jQuery.plot("#chart_bi_"+index, [data], {
+                                series: {
+                                    bars: {
+                                        show: true,
+                                        barWidth: 0.6,
+                                        lineWidth: 0,
+                                        align: "center",
+                                        fillColor: { colors: [ { opacity: 1.0 }, { opacity: 1.0 } ] }
+                                    }
+                                },
+                                xaxis: {
+                                    mode: "categories",
+                                    tickLength: 0
+                                },
+                                yaxis: {
+                                    tickDecimals: 0
+                                }
+                            });
+                    }
+                });
+            initUniform();
+        }
+    </script>
+</body>
+</html>

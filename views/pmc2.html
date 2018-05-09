@@ -1,0 +1,171 @@
+$def with (pagedata={})
+$code:
+    #我的调查币
+    static_host = pagedata.get('static_host','')
+    NotInWeChat = pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0
+    FSOBJ = pagedata.get('FSOBJ')
+    random_value = pagedata.get('r','')
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>我的调查币</title>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    .weui-navbar__item.weui-bar__item_on {color: #1aad19;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="page__bd">
+            <div class="weui-cells">
+                <div class="weui-cell">
+                    <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+                        $if FSOBJ.HEADIMGURL:
+                            <img src="$FSOBJ.HEADIMGURL" style="width: 50px;display: block">
+                        $else:
+                            <img src="$static_host/static/img/QsSquare80.png" style="width: 50px;display: block">
+                    </div>
+                    <div class="weui-cell__bd">
+                        <p>$unAscSafeString(FSOBJ.NICKNAME)</p>
+                        <p style="font-size: 13px;color: #888888;">调查币余额：$FSOBJ.COIN_HOLD <a href="http://mp.weixin.qq.com/s/EYlO-A5I_ccUHKuJj6EAoQ">什么是调查币？</a></p>
+                    </div>
+                </div>
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <span style="vertical-align: middle">用户等级</span>
+                    </div>
+                    <div class="weui-cell__ft">$FSOBJ.COIN_LEVEL</div>
+                </div>
+            </div>
+
+            <div class="weui-tab">
+                <div class="weui-navbar">
+                    <div class="weui-navbar__item weui-bar__item_on" id="navbar1">
+                        最近明细
+                    </div>
+                    <div class="weui-navbar__item" id="navbar2">
+                        周答卷王
+                    </div>
+                </div>
+                <div class="weui-tab__panel" style="padding-top:20px;">&nbsp;</div>
+            </div>
+            <div class="accordion" name="container" id="container1">
+                <table style="padding:10px;font-size:14px;width:100%">
+                    $for x in FSOBJ['COIN_DETAIL']:
+                        <tr><td>$x.INSERTTIME</td>
+                            <td>$get_coin_title(x.CHG_TYPE)</td>
+                            <td style="text-align:right;">$x.CHG_AMOUNT</td></tr>
+                </table>
+            </div>
+            <div class="accordion" name="container" id="container2" style="display:none;">
+                <table style="padding:10px;font-size:14px;width:100%">
+                    $for x in pagedata['COIN_RANK']:
+                        <tr><td>$unAscSafeString(x.NICKNAME)</td>
+                            <td style="text-align:right;">$x.CHG_AMOUNT</td></tr>
+                </table>
+            </div>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+                <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+                <p class="weui-toast__content" id="toastMessage">已完成</p>
+            </div>
+        </div>
+        <!--end toast-->
+        <!--BEGIN dialog1-->
+        <div class="js_dialog" id="iosDialog1" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="confirmTitle"></strong></div>
+                <div class="weui-dialog__bd" id="confirmMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog1-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            jQuery('.weui-navbar__item').on('click', function () {
+                jQuery(this).addClass('weui-bar__item_on').siblings('.weui-bar__item_on').removeClass('weui-bar__item_on');
+                var gid = 'container'+jQuery(this).attr('id').replace('navbar','');
+                jQuery.each(jQuery('[name="container"]'),function(){
+                    if (jQuery(this).attr('id')==gid) {
+                        jQuery(this).css('display','block');
+                    } else {
+                        jQuery(this).css('display','none');
+                    }
+                });
+            });
+            initUniform();
+        });
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'hideAllNonBaseMenuItem'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+            wx.error(function(res){
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>

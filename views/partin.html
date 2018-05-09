@@ -1,0 +1,253 @@
+$def with (pagedata={})
+$code:
+    #参与的问卷
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    QNLST = pagedata.get('QNLST')
+    random_value = pagedata.get('r','')
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>我参与的问卷</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-metro.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/uniform/css/uniform.default.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.qs.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            我参与的问卷
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+
+                    </div>
+                </div>
+            <br>
+            <div class="accordion" id="accordion1">
+                $for QNOBJ in QNLST:
+                    <div class="accordion-group">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_$QNOBJ.QN_ID" style="padding-right: 40px;">
+                                <i class="$(QNOBJ.ICON_CLASS)"></i>&nbsp;$brief_format_date(QNOBJ.AN_INPUT_TIME)&nbsp;
+                                $if QNOBJ.QN_TYPE==1:
+                                    $:('<strong style="color:red">中奖</strong>' if QNOBJ.WIN_FSID==FSOBJ.FS_ID and QNOBJ.WIN_NO==QNOBJ.ANSWER_NO else '')奖品：$(QNOBJ.PRIZE_TITLE)
+                                $elif QNOBJ.QN_TYPE==2:
+                                    红包：$QNOBJ.AN_HONGBAO
+                                $elif QNOBJ.QN_TYPE==3:
+                                    调查币：$format_money(QNOBJ.AN_HONGBAO+QNOBJ.AN_JIANGLI,0)
+                                $else:
+                                    $(QNOBJ.QN_TITLE)
+                            </a>
+                        $if QNOBJ.QN_PUBLIC and QNOBJ.QN_STATUS>=2:
+                            <div class="btn-group edit">
+                                <a class="btn" href="#" data-toggle="dropdown"><i class="icon-reorder"></i></a>
+                                <ul class="dropdown-menu" style="left:-122px;">
+                                    $if QNOBJ.QN_STATUS>=2:
+                                        <li><a href="javascript:clickViewStat('$QNOBJ.QN_ID');"><i class="icon-bar-chart"></i> 查看统计结果</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="collapse_$QNOBJ.QN_ID" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                                $(QNOBJ.QN_TITLE)
+                                $if QNOBJ.QN_SUMMARY:
+                                    <p>$QNOBJ.QN_SUMMARY</p>
+                                $if QNOBJ.QN_TYPE==1:
+                                    <p>
+                                        奖品：$QNOBJ.PRIZE_TITLE - 价值：$QNOBJ.PRIZE_VALUE $('（支持匿名领奖）' if QNOBJ.PRIZE_SEND==0 else '')<br>
+                                        我的抽奖号：$QNOBJ.ANSWER_NO<br>
+                                    $if QNOBJ.WIN_NO:
+                                        抽奖号个数：$QNOBJ.NUM_LOTTERY。中奖号：$QNOBJ.WIN_NO<br>
+                                        抽奖方法：$QNOBJ.END_DATE 深成指成交金额：$format_money(QNOBJ.NUM_399001/100.0,2)。$QNOBJ.NUM_399001 除以 $QNOBJ.NUM_LOTTERY 的余数为：$(QNOBJ.NUM_399001%QNOBJ.NUM_LOTTERY)，加1得到中奖号为：$QNOBJ.WIN_NO<br>
+                                    $if QNOBJ.WIN_FSID==FSOBJ.FS_ID and QNOBJ.WIN_NO==QNOBJ.ANSWER_NO:
+                                        <p style="color:red">恭喜你中奖$:('，兑奖号码 '+QNOBJ.WIN_SERIAL.encode('utf8')+'，领奖办法详见<a href="/faq?faq=01">帮助中心</a>' if QNOBJ.WIN_END==0 else ('，已兑奖' if QNOBJ.WIN_END==1 else '，已领奖'))</p>
+                                    </p>
+                                    <p style="text-align: center;"><img src="" data-original="$QNOBJ.IMG1_URL"></p>
+                                $elif QNOBJ.QN_TYPE==2:
+                                    <p>获得红包：$QNOBJ.AN_HONGBAO</p>
+                                $elif QNOBJ.QN_TYPE==3:
+                                    <p>获得答谢调查币：$format_money(QNOBJ.AN_HONGBAO,0)。获得奖励调查币：$format_money(QNOBJ.AN_JIANGLI,0)</p>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <div class="weui-btn-area" id="divFinish">
+                <button class="weui-btn weui-btn_default" onclick="clickMore();" id="btnBack">更多问卷</button>
+            </div>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+                <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+                <p class="weui-toast__content" id="toastMessage">已完成</p>
+            </div>
+        </div>
+        <!--end toast-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/bootstrap.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/uniform/jquery.uniform.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            jQuery('.accordion-body').on('show.bs.collapse', function () {
+                jQuery.each(jQuery(this).find('img'),function(idx,obj){
+                    if (!jQuery(obj).attr('src') && jQuery(obj).data('original')) {
+                        jQuery(obj).attr('src',jQuery(obj).data('original'));
+                    };
+                })
+            });
+        });
+        var myDate = new Date();
+        var qryear = myDate.getFullYear();
+        var clickMore = function() {
+            jQuery.ajax({
+                url: '/rst/partin?fsid=$(FSOBJ.FS_ID)&r=$random_value&y='+qryear,
+                type: "GET",
+                async: false,
+                beforeSend: function() {},
+                success: function(retval) {
+                    console.log(retval)
+                    if (retval=='None') {
+                        showToastMessage('没有更多问卷了');
+                        jQuery('#btnBack').css('display','none');
+                    } else {
+                        var all_items = JSON.parse(retval);
+                        appendQuestion(all_items);
+                        qryear = qryear-1;
+                    }
+                },
+                error: ajaxErrorHandle
+            });
+        }
+        var appendQuestion = function(all_items){
+            jQuery.each(all_items, function(index, item) {
+                myDate = new Date(item.AN_INPUT_TIME.replace(/-/g,'/'));
+                var addStr = '\
+                    <div class="accordion-group">\
+                        <div class="accordion-heading">\
+                            <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_'+item.QN_ID+'" style="padding-right: 40px;">\
+                                <i class="'+(item.QN_TYPE==0 ? 'icon-question-sign' : (item.QN_TYPE==1?'icon-cny':'icon-trophy'))+'"></i> '+getFullDateTime(myDate)+' ';
+                if (item.QN_TYPE==1) {
+                    if (item.WIN_FSID=='$FSOBJ.FS_ID' && item.WIN_NO==item.ANSWER_NO) {
+                        addStr += '<strong style="color:red">中奖</strong>';
+                    }
+                    addStr += '奖品：'+item.PRIZE_TITLE;
+                } else if (item.QN_TYPE==2) {
+                    addStr += '红包：'+item.AN_HONGBAO;
+                } else if (item.QN_TYPE==3) {
+                    addStr += '调查币：'+Math.round(item.AN_HONGBAO+item.AN_JIANGLI,0);
+                } else {
+                    addStr += item.QN_TITLE;
+                }
+                addStr += '</a>';
+                if (item.QN_PUBLIC &&item.QN_STATUS>=2) {
+                addStr += '<div class="btn-group edit">\
+                                <a class="btn" href="#" data-toggle="dropdown"><i class="icon-reorder"></i></a>\
+                                <ul class="dropdown-menu" style="left:-122px;">\
+                                    <li><a href="javascript:clickViewStat(\''+item.QN_ID+'\');"><i class="icon-bar-chart"></i> 查看统计结果</a></li>\
+                                </ul>\
+                            </div>';
+                };
+                addStr += '</div>\
+                        <div id="collapse_'+item.QN_ID+'" class="accordion-body collapse">\
+                            <div class="accordion-inner">';
+                addStr += '<p>'+item.QN_TITLE+'</p>';
+                if (item.QN_SUMMARY) {
+                    addStr += '<p>'+item.QN_SUMMARY+'</p>';
+                };
+                if (item.QN_TYPE==1) {
+                    addStr += '<p>奖品：'+item.PRIZE_TITLE+' - 价值：'+item.PRIZE_VALUE+(item.PRIZE_SEND==0 ? '（支持匿名领奖）' : '')+'</p>';
+                    addStr += '<p>我的抽奖号：'+item.ANSWER_NO+'</p>';
+                    if (item.WIN_NO) {
+                        addStr += '<p>中奖号：'+item.WIN_NO+'</p>';
+                        addStr += '<p>抽奖号个数：'+item.NUM_LOTTERY+'</p>';
+                        addStr += '<p>抽奖方法：'+item.END_DATE+' 深成指成交金额：'+Math.round(item.NUM_399001/100.0,2)+'。'+item.NUM_399001+' 除以 '+item.NUM_LOTTERY+' 的余数为：'+(item.NUM_399001%item.NUM_LOTTERY)+'，加1得到中奖号为：'+item.WIN_NO+'</p>';
+                    };
+                    addStr += '<p style="text-align: center;"><img src="'+item.IMG1_URL+'" alt=""></p>';
+                } else if (item.QN_TYPE==2) {
+                    addStr += '<p>获得红包：'+item.AN_HONGBAO+'</p>';
+                } else if (item.QN_TYPE==3) {
+                    addStr += '<p>获得答谢调查币：'+Math.round(item.AN_HONGBAO,0)+'。获得奖励调查币：'+Math.round(item.AN_JIANGLI,0)+'</p>';
+                }
+                addStr += '</div></div></div>';
+                jQuery('#accordion1').append(addStr);
+            });
+        }
+        var clickViewStat = function(qnid) {
+            document.location.href = "stview?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid="+qnid;
+        }
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'hideAllNonBaseMenuItem'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+            wx.error(function(res){
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>

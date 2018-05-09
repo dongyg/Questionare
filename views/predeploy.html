@@ -1,0 +1,288 @@
+$def with (pagedata={})
+$code:
+    #预览问卷
+    static_host = pagedata.get('static_host','')
+    NotInWeChat = pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0
+    FSOBJ = pagedata.get('FSOBJ')
+    QNOBJ = pagedata.get('QNOBJ')
+    random_value = pagedata.get('r','')
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>确认问卷</title>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body>
+    <div class="page" id="pageBody">
+        <div class="page__bd">
+            <article class="weui-article" style="padding-bottom: 0px;">
+                <h1>$QNOBJ.QN_TITLE</h1>
+                <p class="page__desc">
+                    公开调查：$('公开' if QNOBJ.QN_DEPLOY else '不公开')。公开结果：$('公开' if QNOBJ.QN_PUBLIC else '不公开')
+                    <br>目标样本数：$QNOBJ.QN_MAX
+                </p>
+                $if QNOBJ.QN_SUMMARY:
+                    <p>$QNOBJ.QN_SUMMARY</p>
+                <p id="pItemCount"></p>
+                $if QNOBJ.IMG1_URL:
+                    <p style="text-align: center;"><img src="$QNOBJ.IMG1_URL" alt=""></p>
+                $for no,url in QNOBJ['IMGDETAIL_URLS']
+                    <!-- <p style="text-align: center;"><img src="$url" alt=""></p> -->
+            </article>
+            <div class="weui-cells">
+                <a class="weui-cell weui-cell_access" href="javascript:clickDeployAs(0);">
+                    <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+                        <i class="icon-question-sign icon-2x" style="color:#1aad19;"></i>
+                    </div>
+                    <div class="weui-cell__bd">
+                        <p>发布为普通问卷</p>
+                        <p style="font-size: 13px;color: #888888;">通常用于向特定群体发布问卷调查，发布后直接开始回收</p>
+                    </div>
+                    <div class="weui-cell__ft"></div>
+                </a>
+                <a class="weui-cell weui-cell_access" href="javascript:clickDeployAs(1);">
+                    <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+                        <i class="icon-trophy icon-2x" style="color:#1aad19;"></i>
+                    </div>
+                    <div class="weui-cell__bd">
+                        <p>发布为有奖问卷</p>
+                        <p style="font-size: 13px;color: #888888;">提供一个奖品给问卷参与人，同时可再提交5张图片描述您的奖品、宣传您的产品</p>
+                    </div>
+                    <div class="weui-cell__ft"></div>
+                </a>
+                <a class="weui-cell weui-cell_access" href="javascript:clickDeployAs(2);">
+                    <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+                        <i class="icon-cny icon-2x" style="color:#1aad19;"></i>
+                    </div>
+                    <div class="weui-cell__bd">
+                        <p>发布为红包问卷</p>
+                        <p style="font-size: 13px;color: #888888;">就像微信红包一样给问卷参与人分抢，支付红包款后答卷人抢得的红包由问卷调查大师服务号负责发放</p>
+                    </div>
+                    <div class="weui-cell__ft"></div>
+                </a>
+                <a class="weui-cell weui-cell_access" href="javascript:clickDeployAs(3);">
+                    <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+                        <i class="icon-group icon-2x" style="color:#1aad19;"></i>
+                    </div>
+                    <div class="weui-cell__bd">
+                        <p>发布为互助问卷</p>
+                        <p style="font-size: 13px;color: #888888;">发扬互联网共享互助精神，互助答卷，以调查币代替真实货币</p>
+                    </div>
+                    <div class="weui-cell__ft"></div>
+                </a>
+                $if pagedata.get('WXCODE')=='test':
+                    <a class="weui-cell weui-cell_access" href="javascript:clickSendToServer();">
+                        <div class="weui-cell__hd" style="position: relative;margin-right: 10px;">
+                            <i class="icon-upload-alt icon-2x" style="color:#1aad19;"></i>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <p>上传至正式服务器</p>
+                            <p style="font-size: 13px;color: #888888;">这个功能仅在测试服务器上可用，可以将当前问卷上传到正式服务器上。发布人的身份在两个服务器上是一致的。上传后需要在正式服务器上再预览发布，再发布为指定类型问卷。注意：不支持上传问卷的图片，所以不要给问卷设置图片。</p>
+                        </div>
+                        <div class="weui-cell__ft"></div>
+                    </a>
+            </div>
+            <div class="weui-btn-area">
+                <button class="weui-btn weui-btn_default" onclick="clickBack();" id="btnBack">返回编辑题目</button>
+            </div>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+                <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+                <p class="weui-toast__content" id="toastMessage">已完成</p>
+            </div>
+        </div>
+        <!--end toast-->
+        <!--BEGIN dialog1-->
+        <div class="js_dialog" id="iosDialog1" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="confirmTitle"></strong></div>
+                <div class="weui-dialog__bd" id="confirmMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog1-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            initUniform();
+            loadQuestion();
+        });
+        var all_items = [];
+        var loadQuestion = function() {
+            jQuery.ajax({
+                url: '/rst/question?qnid=$(QNOBJ.QN_ID)',
+                type: "GET",
+                async: false,
+                beforeSend: function() {},
+                success: function(retval) {
+                    all_items = JSON.parse(retval);
+                    var s = '<span>设置题目 '+all_items.length+' 个</span>';
+                    jQuery.each(all_items, function(index, item) {
+                        s += '<h4>'+(index+1)+'. '+item['QI_TITLE']+'</h4>';
+                    });
+                    jQuery('#pItemCount').html(s);
+                },
+                error: ajaxErrorHandle
+            });
+        }
+        var clickBack = function() {
+            document.location.href = 'question?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid=$(QNOBJ.QN_ID)';
+        }
+        var clickDeployAs = function(qntype) {
+            var msg = '';
+            if (qntype==0) {
+                msg = '确定发布为普通问卷吗？<br>确定发布后将直接开始回收';
+            } else if (qntype==1) {
+                msg = '确定发布为有奖问卷吗？<br>确定后将请您填写奖品信息';
+            } else if (qntype==2) {
+                msg = '确定发布为红包问卷吗？<br>确定后将请您填写红包信息';
+            } else if (qntype==3) {
+                msg = '确定发布为互助问卷吗？<br>确定后将请您填写调查币信息';
+            }
+            showConfirmMessage('提示',msg,function(){
+                jQuery.ajax({
+                    url: '/rst/createqs?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid=$(QNOBJ.QN_ID)&qntype='+qntype,
+                    type: "PUT",
+                    async: false,
+                    beforeSend: function() {},
+                    success: function(retval) {
+                        var data = JSON.parse(retval);
+                        if (data.success) {
+                            document.location.href = data.success;
+                        } else if (data.error) {
+                            showDialogMessage(data.error)
+                        } else {
+                            showDialogMessage('发生未知错误')
+                        }
+                    },
+                    error: ajaxErrorHandle
+                });
+            });
+        }
+        var clickGoOn = function () {
+            if (all_items.length==0) {
+                showDialogMessage('还没有设置问卷题目！');
+                return;
+            };
+            jQuery.ajax({
+                url: '/rst/prepay',
+                type: "POST",
+                async: false,
+                data: {'fsid':'$(FSOBJ.FS_ID)', 'r':'$random_value', 'qnid':'$(QNOBJ.QN_ID)'},
+                beforeSend: function() {},
+                success: function(retval) {
+                    var data = JSON.parse(retval);
+                    if (data.success) {
+                        document.location.href = data.success;
+                    } else if (data.error) {
+                        showDialogMessage(data.error)
+                    } else {
+                        console.log(retval)
+                        showDialogMessage('发生未知错误')
+                    }
+                },
+                error: ajaxErrorHandle
+            });
+        }
+        $if pagedata.get('WXCODE')=='test':
+            var clickSendToServer = function() {
+                var rup = prompt("请输入你在正式服务器上的R值","")
+                if (rup==null) {
+                } else {
+                    jQuery.ajax({
+                        url: '/admin/sycntoqs',
+                        type: "POST",
+                        async: true,
+                        data: {'fsid':'$(FSOBJ.FS_ID)', 'r':'$random_value', 'rup':rup, 'qnid':'$(QNOBJ.QN_ID)'},
+                        beforeSend: function() {blockUI('#pageBody')},
+                        success: function(retval) {
+                            var data = JSON.parse(retval);
+                            if (data.success) {
+                                showDialogMessage(data.success)
+                            } else if (data.error) {
+                                showDialogMessage(data.error)
+                            } else {
+                                console.log(retval)
+                                showDialogMessage('发生未知错误')
+                            }
+                        },
+                        complete: function() {unblockUI('#pageBody')},
+                        error: ajaxErrorHandle
+                    });
+                }
+            }
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'hideAllNonBaseMenuItem'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+            wx.error(function(res){
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>

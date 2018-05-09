@@ -1,0 +1,413 @@
+$def with (pagedata={})
+$code:
+    #答问卷（有偿无偿共用）
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    QNOBJ = pagedata.get('QNOBJ')
+    random_value = pagedata.get('r','')
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>$QNOBJ.QN_TYPENAME</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-metro.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/uniform/css/uniform.default.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.qs.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    .accordion-inner .btn {margin-top: 1px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    /*修改bootstrap中对input和select的样式使其保持weui的样式*/
+    select,
+    input[type="text"] {
+        display: inherit;
+        padding: 0;
+        margin-bottom: inherit;
+        vertical-align: inherit;
+        -webkit-border-radius: inherit;
+        -moz-border-radius: inherit;
+        border-radius: inherit;
+        /*weui的样式*/
+        width: 100%;
+        border: 0;
+        outline: 0;
+        -webkit-appearance: none;
+        background-color: transparent;
+        font-size: inherit;
+        color: inherit;
+        height: 1.41176471em;
+        line-height: 1.41176471
+    }
+    input[type="text"] {
+        -webkit-box-shadow: inherit;
+        -moz-box-shadow: inherit;
+        box-shadow: inherit;
+        -webkit-transition: inherit;
+        -moz-transition: inherit;
+        -o-transition: inherit;
+        transition: inherit;
+    }
+    input[type="text"]:focus {
+        border-color: inherit;
+        -webkit-box-shadow: inherit;
+        -moz-box-shadow: inherit;
+        box-shadow: inherit)
+    }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            $QNOBJ.QN_TITLE
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+
+                    </div>
+                </div>
+
+            <div class="weui-cells__title" style="text-align: center;">
+                <h4>
+                    $QNOBJ.QN_TITLE
+                </h4>
+                $if QNOBJ.QN_TYPE==1:
+                    <p class="page__desc" style="text-align:center;color:red;"><a href="/pzview?fsid=$FSOBJ.FS_ID&r=$random_value&qnid=$QNOBJ.QN_ID">这是有奖调查问卷，答卷后可参与抽奖。奖品：$QNOBJ.PRIZE_TITLE - 价值：$QNOBJ.PRIZE_VALUE元</a> $('（支持匿名领奖）' if QNOBJ.PRIZE_SEND==0 else '')</p>
+                $elif QNOBJ.QN_TYPE==2:
+                    <p class="page__desc" style="text-align:center;color:red;">这是红包调查问卷，答卷后可得到一个随机红包，由【问卷调查大师】服务号发放（红包款由问卷发布人提供）</p>
+                $elif QNOBJ.QN_TYPE==3:
+                    <p class="page__desc" style="text-align:center;color:red;">这是互助问卷，答卷后您将获得问卷发布人答谢的$format_money(QNOBJ.HONGBAO_MNY,0)调查币，以及系统奖励$(QNOBJ.QN_NO*get_multiple(FSOBJ.MULTIPLE))调查币</p>
+                $if QNOBJ.QN_SUMMARY:
+                    $QNOBJ.QN_SUMMARY
+            </div>
+            <form action="/rst/answer" method="POST" class="form-horizontal" id="theform">
+                <input type="hidden" id="fsid" name="fsid" value="$(FSOBJ.FS_ID if FSOBJ else '')">
+                <input type="hidden" id="r" name="r" value="$random_value">
+                <input type="hidden" id="qnid" name="qnid" value="$(QNOBJ.QN_ID if QNOBJ else '')">
+                <input type="hidden" id="AN_CONTENT" name="AN_CONTENT" value="">
+            </form>
+            <div class="accordion" id="accordion1">
+                <!-- 题目容器 -->
+            </div>
+            <!-- 答完提交 -->
+            <div class="weui-cells__tips">问卷题目至此为止，感谢参与，请提交！</div>
+            <div class="weui-btn-area" id="divFinish">
+                <button class="weui-btn weui-btn_primary" onclick="clickFinish();" id="btnFinish">提交</button>
+                <br>
+            </div>
+            $if QNOBJ.QN_TYPE==1:
+                <div class="weui-cells__title">
+                    抽奖规则：<br>
+                    1、参与答卷后答卷人获得一个抽奖号，每个问卷从1开始编号。同时答卷人的引荐人也将获得一个抽奖号。<br>
+                    2、问卷结束时，取当天或其后的最近一个交易日深交所深成指成交金额，乘以100，除以问卷最大抽奖号，得到的余数加1，为中奖号。<br>
+                    奖品发放：<br>
+                    1、$('由问卷发布人发放奖品，需要提供通信地址、电话等联系信息以便领奖。问卷调查大师不承担奖品发放责任。' if QNOBJ.PRIZE_SEND else '由问卷调查大师代问卷发布人发放奖品，支持匿名领奖。')<br>
+                    2、领奖时需要中奖人提供兑奖号码，在中奖查询中可以查看。<br>
+                    3、匿名领奖时，问卷调查大师只负责代中奖人付款，由京东直接寄送奖品，问卷调查大师不负责退换货、保修等服务。
+                </div>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+                <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+                <p class="weui-toast__content" id="toastMessage">已完成</p>
+            </div>
+        </div>
+        <!--end toast-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/bootstrap.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/uniform/jquery.uniform.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            loadQuestion();
+            // jQuery('input[type="radio"]').bind("click",collAndExp);
+        });
+        var loadQuestion = function() {
+            jQuery.ajax({
+                url: '/rst/question?qnid=$QNOBJ.QN_ID',
+                type: "GET",
+                async: false,
+                beforeSend: function() {},
+                success: function(retval) {
+                    all_items = JSON.parse(retval);
+                    reloadAllItems('#accordion1',all_items,false);
+                },
+                error: ajaxErrorHandle
+            });
+        }
+        var collAndExp = function() {
+            //当前题目收起
+            var parent = jQuery(this).parents('.accordion-body.collapse.in');
+            parent.collapse('hide');
+            //下一题目展开
+            var next = parent.parent().next().find('.accordion-body.collapse');
+            next.collapse('show');
+        }
+        var clickStar = function(askno,optionno) {
+            for (var i = 1; i <= 5; i++) {
+                if (i==optionno) {
+                    jQuery('#ask'+askno+'_op'+i).attr('class','btn green');
+                    //下一题目展开
+                    // var parent = jQuery('#ask'+askno+'_op'+i).parents('.accordion-body.collapse.in');
+                    // parent.collapse('hide');
+                    // var next = parent.parent().next().find('.accordion-body.collapse');
+                    // next.collapse('show');
+                } else {
+                    jQuery('#ask'+askno+'_op'+i).attr('class','btn');
+                }
+            };
+            // collAndExp();
+        }
+        var clickBoolean = function(askno,optionno) {
+            for (var i = 1; i <= 3; i++) {
+                if (i==optionno) {
+                    jQuery('#ask'+askno+'_op'+i).attr('class','btn green');
+                    //下一题目展开
+                    // var parent = jQuery('#ask'+askno+'_op'+i).parents('.accordion-body.collapse.in');
+                    // parent.collapse('hide');
+                    // var next = parent.parent().next().find('.accordion-body.collapse');
+                    // next.collapse('show');
+                } else {
+                    jQuery('#ask'+askno+'_op'+i).attr('class','btn');
+                }
+            };
+        }
+        var clickRadio = function(askno,optionno) {
+            jQuery('[name="ask'+askno+'"]').each(function(){
+                jQuery(this).attr('class','btn');
+            })
+            jQuery('#ask'+askno+'_op'+optionno).attr('class','btn green');
+            //下一题目展开
+            // var parent = jQuery('#ask'+askno+'_op'+optionno).parents('.accordion-body.collapse.in');
+            // parent.collapse('hide');
+            // var next = parent.parent().next().find('.accordion-body.collapse');
+            // next.collapse('show');
+        }
+        var clickCheck = function(askno,optionno) {
+            var title = jQuery('#ask'+askno+'_op'+optionno).attr('class');
+            if (title.indexOf('green')>=0) {
+                jQuery('#ask'+askno+'_op'+optionno).attr('class','btn');
+            } else {
+                jQuery('#ask'+askno+'_op'+optionno).attr('class','btn green');
+            }
+        }
+        var all_items = [{"QI_TYPE":"R","QI_TITLE":"age","QI_OPTION":["10","20","30"]},{"QI_TYPE":"C","QI_TITLE":"hobby","QI_OPTION":["PingPang","Basketball","Running"]}];
+        var checkInput = function() {
+            var retans = [];
+            var allchk = [];
+            jQuery.each(all_items, function(index, item) {
+                var result;
+                if (item.QI_TYPE=='R') {
+                    result = parseInt(jQuery('[name="ask'+index+'"]:checked').val());
+                    retval = !isNaN(result);
+                } else if (item.QI_TYPE=='RA') {
+                    jQuery('[name="ask'+index+'"]').each(function(idx, btn){
+                        if (jQuery(this).attr('class').indexOf("green")>0) {
+                            result = parseInt( jQuery(this).attr('id').replace('ask'+index+'_op','') ) - 1;
+                        }
+                    })
+                    retval = !isNaN(result);
+                } else if (item.QI_TYPE=='C') {
+                    var sel = [];
+                    jQuery('[name="ask'+index+'"]').each(function(){
+                        if(jQuery(this).prop("checked")){
+                            var t = parseInt(jQuery(this).val());
+                            if (!isNaN(t)) {
+                                sel.push(t);
+                            };
+                        }
+                    })
+                    result = sel;
+                    retval = result.length>0;
+                } else if (item.QI_TYPE=='CH') {
+                    var sel = [];
+                    jQuery('[name="ask'+index+'"]').each(function(){
+                        if(jQuery(this).attr('class').indexOf('green')>0){
+                            var t = parseInt(jQuery(this).attr('id').replace('ask'+index+'_op','')) - 1;
+                            if (!isNaN(t)) {
+                                sel.push(t);
+                            };
+                        }
+                    })
+                    result = sel;
+                    retval = result.length>0;
+                } else if (item.QI_TYPE=='S') {
+                    jQuery('[name="ask'+index+'"]').each(function(idx, btn){
+                        if (jQuery(this).attr('class').indexOf("green")>0) {
+                            result = idx
+                        }
+                    })
+                    retval = result!=null && result!=undefined;
+                } else if (item.QI_TYPE=='B') {
+                    jQuery('[name="ask'+index+'"]').each(function(idx, btn){
+                        if (jQuery(this).attr('class').indexOf("green")>0) {
+                            result = idx
+                        }
+                    })
+                    retval = result!=null && result!=undefined;
+                } else if (item.QI_TYPE=='T') {
+                    result = jQuery('#ask'+index).val();
+                    retval = result!=null && result!='' && result!=undefined;
+                }
+                // console.log(item.QI_TITLE+' - '+result+' - '+retval);
+                if (!retval){
+                    jQuery('#a_ask_'+index).css('color','red');
+                } else {
+                    jQuery('#a_ask_'+index).css('color','');
+                }
+                retans.push(result);
+                allchk.push(retval);
+            });
+            jQuery('#AN_CONTENT').val(JSON.stringify(retans));
+            // console.log(allchk)
+            return !(jQuery.inArray(false,allchk)>=0);
+        }
+        var clickFinish = function(silence){
+            if (checkInput()) {
+                // console.log(jQuery('#AN_CONTENT').val())
+                jQuery('#theform').submit();
+            } else {
+                showToastMessage('有未回答的问题！');
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'onMenuShareTimeline',
+                'onMenuShareAppMessage',
+                'onMenuShareQQ',
+                'onMenuShareWeibo',
+                'onMenuShareQZone'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            var lineLink = "$:QNOBJ.SHARE_LINK";
+            var descContent = "$QNOBJ.SHARE_DESC";
+            var imgUrl = "$QNOBJ.SHARE_PICURL";
+            var shareTitle = "$QNOBJ.SHARE_TITLE";
+            wx.onMenuShareTimeline({
+                title: shareTitle,
+                link: lineLink,
+                imgUrl: imgUrl,
+                success: function () {
+                    // 用户确认分享后执行的回调函数
+                    // alert('分享成功');
+                },
+                cancel: function () {
+                    // 用户取消分享后执行的回调函数
+                }
+            });
+            wx.onMenuShareAppMessage({
+                title: shareTitle,
+                desc: descContent,
+                link: lineLink,
+                imgUrl: imgUrl,
+                success: function () {
+                    // 用户确认分享后执行的回调函数
+                    // alert('分享成功');
+                },
+                cancel: function () {
+                    // 用户取消分享后执行的回调函数
+                }
+            });
+            wx.onMenuShareQQ({
+                title: shareTitle,
+                desc: descContent,
+                link: lineLink,
+                imgUrl: imgUrl,
+                success: function () {
+                    // 用户确认分享后执行的回调函数
+                    // alert('分享成功');
+                },
+                cancel: function () {
+                    // 用户取消分享后执行的回调函数
+                }
+            });
+            wx.onMenuShareWeibo({
+                title: shareTitle,
+                desc: descContent,
+                link: lineLink,
+                imgUrl: imgUrl,
+                success: function () {
+                    // 用户确认分享后执行的回调函数
+                    // alert('分享成功');
+                },
+                cancel: function () {
+                    // 用户取消分享后执行的回调函数
+                }
+            });
+            wx.onMenuShareQZone({
+                title: shareTitle,
+                desc: descContent,
+                link: lineLink,
+                imgUrl: imgUrl,
+                success: function () {
+                    // 用户确认分享后执行的回调函数
+                    // alert('分享成功');
+                },
+                cancel: function () {
+                    // 用户取消分享后执行的回调函数
+                }
+            });
+            wx.error(function(res){
+                // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>

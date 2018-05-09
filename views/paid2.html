@@ -1,0 +1,190 @@
+$def with (pagedata={})
+$code:
+    #创建有奖问卷第2步，付保证金
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    QNOBJ = pagedata.get('QNOBJ')
+    random_value = pagedata.get('r','')
+    ua = pagedata['HTTP_USER_AGENT']
+    g50 = ua[ua.find('MicroMessenger/')+15:] >='5.0'
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>预付保证金</title>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+</head>
+<body>
+    <div class="page">
+        <div class="page__bd">
+            <div class="weui-tab">
+                <div class="weui-navbar">
+                    <div class="weui-navbar__item weui-bar__item_on">
+                        预付保证金
+                    </div>
+                </div>
+                <div class="weui-tab__panel">
+
+                </div>
+            </div>
+
+            <div class="weui-cells__title">预付保证金</div>
+            <div class="weui-form-preview">
+                <div class="weui-form-preview__hd">
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">付款金额</label>
+                        <em class="weui-form-preview__value">¥$(format_money(QNOBJ.PRIZE_VALUE+QNOBJ.COMMISSION+QNOBJ.FARE,2))</em>
+                    </div>
+                </div>
+                <div class="weui-form-preview__bd">
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">奖品</label>
+                        <span class="weui-form-preview__value">$QNOBJ.PRIZE_TITLE</span>
+                    </div>
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">奖品价值</label>
+                        <span class="weui-form-preview__value">$format_money(QNOBJ.PRIZE_VALUE,2)</span>
+                    </div>
+                    <div class="weui-form-preview__item">
+                        <label class="weui-form-preview__label">微信支付手续费</label>
+                        <span class="weui-form-preview__value">$format_money(QNOBJ.FARE,2)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-cells__tips">保证金有2个作用：一是支持获奖人完全匿名的领奖，二是可以保障获奖人的权益。<br>系统为广大网友提供问卷调查的发布和参与平台，不收取任何费用，所产生的微信支付手续费需要由问卷发布人承担。若您选择自行兑奖，兑奖后申请退款时手续费也会退还，实际上不会产生任何费用。</div>
+
+            <div class="weui-btn-area">
+                $if g50:
+                    <a class="weui-btn weui-btn_primary" href="javascript:clickPay();" id="showTooltips">支付</a>
+                $else:
+                    <button>请使用微信5.0及以上版本进行支付</button>
+            </div>
+            <div class="weui-cells__tips">支付保证金后问卷将自动开始回收</div>
+        </div>
+        <!--BEGIN dialog1-->
+        <div class="js_dialog" id="iosDialog1" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="confirmTitle"></strong></div>
+                <div class="weui-dialog__bd" id="confirmMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog1-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            initUniform();
+        });
+    </script>
+    <script type="text/javascript">
+    function checkPay() {
+        //去后台验证支付结果，成功就跳转至paid3
+        jQuery.ajax({
+            url: '/rst/deploy',
+            type: "POST",
+            async: false,
+            data: {'fsid':'$FSOBJ.FS_ID','r':'$random_value','qnid':'$QNOBJ.QN_ID'},
+            beforeSend: function() {},
+            success: function(retval) {
+                var data = JSON.parse(retval);
+                if (data.success) {
+                    document.location.href = data.success;
+                } else if (data.error) {
+                    showDialogMessage(data.error)
+                } else {
+                    showDialogMessage('发生未知错误')
+                }
+            },
+            error: ajaxErrorHandle
+        });
+    }
+    function onBridgeReady() {
+        WeixinJSBridge.invoke(
+            'getBrandWCPayRequest', {
+                "appId": '$pagedata.get("APPID","")', //公众号名称，由商户传入
+                "timeStamp": "$signPackage.timeStamp", //时间戳，自1970年以来的秒数
+                "nonceStr": "$signPackage.nonceStr", //随机串
+                "package": "$signPackage.package",
+                "signType": "$signPackage.signType", //微信签名方式:
+                "paySign": "$signPackage.paySign" //微信签名
+            },
+            function(res) {
+                if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+                    checkPay();
+                } else if (res.err_msg == 'get_brand_wcpay_request:cancel') {
+                    showDialogMessage('你取消了支付');
+                } else {
+                    // alert(JSON.stringify(res));
+                    // alert(res.err_msg); // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返
+                    showDialogMessage('调用微信支付出现错误，请联系服务号客服！')
+                }
+            }
+        );
+    }
+    function clickPay() {
+        showConfirmMessage('提示',"问卷开始回收后不能修改题目，请确认题目已设置完成",function(){
+            if (typeof WeixinJSBridge == "undefined") {
+                if (document.addEventListener) {
+                    document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+                } else if (document.attachEvent) {
+                    document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+                    document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+                }
+            } else {
+                onBridgeReady();
+            }
+        });
+    }
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'hideAllNonBaseMenuItem'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+            wx.error(function(res){
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,512 @@
+$def with (pagedata={})
+$code:
+    #通用创建问卷第1步，输入问卷信息
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    QNOBJ = pagedata.get('QNOBJ')
+    random_value = pagedata.get('r','')
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>创建问卷</title>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    .accordion-inner .btn {margin-top: 1px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body>
+    <div class="page" id="pageBody">
+    <form id="theform" enctype="multipart/form-data" >
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            创建问卷
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+
+                    </div>
+                </div>
+
+            <input type="hidden" id="fsid" name="fsid" value="$(FSOBJ.FS_ID)">
+            <input type="hidden" id="r" name="r" value="$random_value">
+            <input type="hidden" id="qnid" name="qnid" value="$(QNOBJ.QN_ID if QNOBJ else '')">
+            <div class="weui-cells weui-cells_form">
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <input class="weui-input" type="text" autocomplete="off" id="QN_TITLE" name="QN_TITLE" placeholder="请输入问卷标题" value="$(QNOBJ.QN_TITLE if QNOBJ else '')"/>
+                    </div>
+                </div>
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <textarea class="weui-textarea" autocomplete="off" id="QN_SUMMARY" name="QN_SUMMARY" onkeyup="changeSummary()" placeholder="请输入问卷描述" rows="3">$(QNOBJ.QN_SUMMARY if QNOBJ else '')</textarea>
+                        <div class="weui-textarea-counter"><span id="spanTextLength">0</span>/2000</div>
+                    </div>
+                </div>
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <input class="weui-input" type="number" autocomplete="off" pattern="[0-9]*" id="QN_MAX" name="QN_MAX" placeholder="目标样本数" value="$(QNOBJ.QN_MAX if QNOBJ and QNOBJ.QN_MAX else '')"/>
+                    </div>
+                </div>
+                <div class="weui-cell">
+                    <div class="weui-cell__bd">
+                        <div class="weui-uploader">
+                            <div class="weui-uploader__hd">
+                                <p class="weui-uploader__title">微信消息图(640x320像素)</p>
+                                <div class="weui-uploader__info"><span id="uploaderCount1">$(1 if QNOBJ and QNOBJ.get('IMG1_URL') else 0)</span>/1</div>
+                            </div>
+                            <div class="weui-uploader__bd">
+                                <ul class="weui-uploader__files" id="uploaderFiles1">
+                                $if QNOBJ and QNOBJ.get('IMG1_URL'):
+                                    <li class="weui-uploader__file" style="background-image:url($(QNOBJ['IMG1_URL']))" name="liImage"></li>
+                                </ul>
+                                <div class="weui-uploader__input-box" style="display:$('none' if QNOBJ and QNOBJ.get('IMG1_URL') else 'block')">
+                                    <input id="uploaderInput1" class="weui-uploader__input" type="file" accept="image/*" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-cells__tips">图片用于在微信消息和分享链接中显示</div>
+            <div class="weui-cells weui-cells_form">
+                <div class="weui-cell weui-cell_switch">
+                    <div class="weui-cell__bd">公开问卷结果</div>
+                    <div class="weui-cell__ft">
+                        <label for="QN_PUBLIC" class="weui-switch-cp">
+                            <input id="QN_PUBLIC" name="QN_PUBLIC" class="weui-switch-cp__input" type="checkbox" value="1" $:('checked="checked"' if QNOBJ and QNOBJ.QN_PUBLIC==1 else '') />
+                            <div class="weui-switch-cp__box"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-cells__tips">答卷人答卷后可以查看问卷的统计结果</div>
+            <div class="weui-cells weui-cells_form">
+                <div class="weui-cell weui-cell_switch">
+                    <div class="weui-cell__bd">公开调查</div>
+                    <div class="weui-cell__ft">
+                        <label for="QN_DEPLOY" class="weui-switch-cp">
+                            <input id="QN_DEPLOY" name="QN_DEPLOY" class="weui-switch-cp__input" type="checkbox" onchange="changeDeployType()" value="0" $:('checked="checked"' if QNOBJ and QNOBJ.QN_DEPLOY else '') />
+                            <div class="weui-switch-cp__box"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-cells__tips">当您的问卷面向预定的群体时，请不要选择公开调查。而选择公开调查时，问卷调查大师的用户可以主动查阅到您的问卷，或收到推送消息，您可以设置样本筛选条件</div>
+            <div id="divSampleFilter" style="display: $:('block' if QNOBJ and QNOBJ.QN_DEPLOY else 'none')">
+                <div class="weui-cells__title">样本筛选</div>
+                <div class="weui-cells">
+                    <div class="weui-cell weui-cell_select weui-cell_select-after">
+                        <div class="weui-cell__hd">
+                            <span for="" class="weui-label">省份</span>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <select class="weui-select" id="QN_PROVINCE" name="QN_PROVINCE" onchange="changeProvince();">
+                                <option value="不限">不限</option>
+                                <option value="北京">北京</option>
+                                <option value="天津">天津</option>
+                                <option value="河北">河北</option>
+                                <option value="山西">山西</option>
+                                <option value="内蒙古">内蒙古</option>
+                                <option value="辽宁">辽宁</option>
+                                <option value="吉林">吉林</option>
+                                <option value="黑龙江">黑龙江</option>
+                                <option value="上海">上海</option>
+                                <option value="江苏">江苏</option>
+                                <option value="浙江">浙江</option>
+                                <option value="安徽">安徽</option>
+                                <option value="福建">福建</option>
+                                <option value="江西">江西</option>
+                                <option value="山东">山东</option>
+                                <option value="河南">河南</option>
+                                <option value="湖北">湖北</option>
+                                <option value="湖南">湖南</option>
+                                <option value="广东">广东</option>
+                                <option value="广西">广西</option>
+                                <option value="海南">海南</option>
+                                <option value="重庆">重庆</option>
+                                <option value="四川">四川</option>
+                                <option value="贵州">贵州</option>
+                                <option value="云南">云南</option>
+                                <option value="西藏">西藏</option>
+                                <option value="陕西">陕西</option>
+                                <option value="甘肃">甘肃</option>
+                                <option value="青海">青海</option>
+                                <option value="宁夏">宁夏</option>
+                                <option value="新疆">新疆</option>
+                                <option value="香港">香港</option>
+                                <option value="澳门">澳门</option>
+                                <option value="台湾">台湾</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_select weui-cell_select-after">
+                        <div class="weui-cell__hd">
+                            <span for="" class="weui-label">城市</span>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <select class="weui-select" id="QN_CITY" name="QN_CITY">
+                                <option value="不限">不限</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_select weui-cell_select-after">
+                        <div class="weui-cell__hd">
+                            <span for="" class="weui-label">性别</span>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <select class="weui-select" id="QN_SEX" name="QN_SEX">
+                                <option value="0">不限</option>
+                                <option value="1">男</option>
+                                <option value="2">女</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_select weui-cell_select-after">
+                        <div class="weui-cell__hd">
+                            <span for="" class="weui-label">年龄</span>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <select class="weui-select" id="QN_AGE" name="QN_AGE">
+                                <option value="0">不限</option>
+                                <option value="2">20岁及以下</option>
+                                <option value="4">21-25岁</option>
+                                <option value="8">26-30岁</option>
+                                <option value="16">31-40岁</option>
+                                <option value="32">41-50岁</option>
+                                <option value="64">51-60岁</option>
+                                <option value="128">60岁以上</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_select weui-cell_select-after">
+                        <div class="weui-cell__hd">
+                            <span for="" class="weui-label">婚姻状况</span>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <select class="weui-select" id="QN_MARRIAGE" name="QN_MARRIAGE">
+                                <option value="0">不限</option>
+                                <option value="2">已婚</option>
+                                <option value="4">未婚</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_select weui-cell_select-after">
+                        <div class="weui-cell__hd">
+                            <span for="" class="weui-label">学历</span>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <select class="weui-select" id="QN_ACADEMIC" name="QN_ACADEMIC">
+                                <option value="0">不限</option>
+                                <option value="2">初中及以下</option>
+                                <option value="4">高中/中专</option>
+                                <option value="8">大专</option>
+                                <option value="16">本科</option>
+                                <option value="32">硕士</option>
+                                <option value="64">博士</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_select weui-cell_select-after">
+                        <div class="weui-cell__hd">
+                            <span for="" class="weui-label">收入</span>
+                        </div>
+                        <div class="weui-cell__bd">
+                            <select class="weui-select" id="QN_INCOME" name="QN_INCOME">
+                                <option value="0">不限</option>
+                                <option value="2">1000元以下</option>
+                                <option value="4">1001-2000元</option>
+                                <option value="8">2001-3000元</option>
+                                <option value="16">3001-5000元</option>
+                                <option value="32">5001-8000元</option>
+                                <option value="64">8001-10000元</option>
+                                <option value="128">10001-20000元</option>
+                                <option value="256">20000元以上</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="weui-gallery" id="gallery">
+                <span class="weui-gallery__img" id="galleryImg"></span>
+                <div class="weui-gallery__opr">
+                    <a href="javascript:removeImage()" class="weui-gallery__del">
+                        <i class="weui-icon-delete weui-icon_gallery-delete"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="weui-btn-area">
+                <a class="weui-btn weui-btn_primary" href="javascript:clickGoOn();" id="btnContinue">下一步</a>
+            </div>
+        </div>
+    </form>
+    </div>
+    <!-- loading toast -->
+    <div id="loadingToast" style="display:none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p class="weui-toast__content" id="toastMsgLoading">数据加载中</p>
+        </div>
+    </div>
+    <!--BEGIN toast-->
+    <div id="toast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+            <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+            <p class="weui-toast__content" id="toastMessage">已完成</p>
+        </div>
+    </div>
+    <!--end toast-->
+    <!--BEGIN dialog1-->
+    <div class="js_dialog" id="iosDialog1" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="confirmTitle"></strong></div>
+            <div class="weui-dialog__bd" id="confirmMessage"></div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+            </div>
+        </div>
+    </div>
+    <!--END dialog1-->
+    <!--BEGIN dialog2-->
+    <div class="js_dialog" id="iosDialog2" style="display: none;">
+        <div class="weui-mask"></div>
+        <div class="weui-dialog">
+            <div class="weui-dialog__bd" id="dialogMessage"></div>
+            <div class="weui-dialog__ft">
+                <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+            </div>
+        </div>
+    </div>
+    <!--END dialog2-->
+    <input type="hidden" id="oldval">
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/jquery.blockui.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+            changeSummary();
+            initUniform();
+            $if QNOBJ:
+                initSelectAndImage();
+            jQuery('#oldval').val(JSON.stringify(jQuery('#theform').serialize()));
+        });
+        var initSelectAndImage = function() {
+            jQuery("#QN_PROVINCE").val("$(QNOBJ.QN_PROVINCE if QNOBJ else '')");
+            changeProvince();
+            jQuery("#QN_CITY").val("$(QNOBJ.QN_CITY if QNOBJ else '')")
+            jQuery("#QN_SEX").val("$(QNOBJ.QN_SEX if QNOBJ else '')")
+            jQuery("#QN_AGE").val("$(QNOBJ.QN_AGE if QNOBJ else '')")
+            jQuery("#QN_MARRIAGE").val("$(QNOBJ.QN_MARRIAGE if QNOBJ else '')")
+            jQuery("#QN_ACADEMIC").val("$(QNOBJ.QN_ACADEMIC if QNOBJ else '')")
+            jQuery("#QN_INCOME").val("$(QNOBJ.QN_INCOME if QNOBJ else '')")
+        }
+        var setFileBase64 = function(file,saverid) {
+            var reader = new FileReader();
+            reader.onload = function (e) {jQuery(saverid).val(e.target.result);};
+            reader.readAsDataURL(file);
+        }
+        var appendFileBase64 = function(file,saverid) {
+            var reader = new FileReader();
+            reader.onload = function (e) {var arr=jQuery(saverid).val() || []; arr.push(e.target.result); jQuery(saverid).val(JSON.stringify(arr));};
+            reader.readAsDataURL(file);
+        }
+        $$(function(){
+            var tmpl = '<li class="weui-uploader__file" style="background-image:url(#url#)" name="liImage"></li>',
+                $$gallery = $$("#gallery"), $$galleryImg = $$("#galleryImg"),
+                $$uploaderInput1 = $$("#uploaderInput1"),
+                $$uploaderFiles1 = $$("#uploaderFiles1")
+                ;
+            $$uploaderInput1.on("change", function(e){
+                tmpl = '<li class="weui-uploader__file" style="background-image:url(#url#)" name="liImage"><input type="hidden" id="IMG1" name="IMG1" /></li>';
+                var src, url = window.URL || window.webkitURL || window.mozURL, files = e.target.files;
+                if (files.length>0) {
+                    var file = files[0];
+                    if (file.size<256*1024) {
+                        if (url) {
+                            src = url.createObjectURL(file);
+                        } else {
+                            src = e.target.result;
+                        }
+                        $$uploaderFiles1.append($$(tmpl.replace('#url#', src)));
+                        setFileBase64(file,'#IMG1');
+                        jQuery('#uploaderCount1').text($$uploaderFiles1.children().length);
+                        $$uploaderInput1.parent().css('display','none');
+                    } else {
+                        showDialogMessage('文件必须小于256K，大了很费流量的哦！建议使用电脑端的微信，电脑制作图片上传、编辑问卷更方便！')
+                    }
+                };
+            });
+            $$uploaderFiles1.on("click", "li", function(){
+                $$galleryImg.attr("style", this.getAttribute("style"));
+                $$gallery.fadeIn(100);
+            });
+
+            $$gallery.on("click", function(){
+                $$gallery.fadeOut(100);
+            });
+        });
+        var removeImage = function() {
+            var style = jQuery('#galleryImg').attr("style");
+            jQuery('[name="liImage"]').each(function(){
+                if (jQuery(this).attr('style')==style) {
+                    var uploader = jQuery(this).parent().attr('id');
+                    if (uploader=='uploaderFiles1') {
+                        if (jQuery(this).parent().children().length<=1) {
+                            jQuery(this).parent().next().css('display','block');
+                        }
+                    }
+                    jQuery(this).remove();
+                    jQuery('#uploaderCount1').text(jQuery('#uploaderFiles1').children().length);
+                };
+            });
+        }
+        var changeDeployType = function() {
+            var data = jQuery('#theform').serialize(); //用val()或attr('checked')的方法拿不到checkbox的值。只好通过serialize来获取判断
+            if (data.indexOf('QN_DEPLOY')>=0) {
+                jQuery('#divSampleFilter').css('display','block')
+            }else{
+                jQuery('#divSampleFilter').css('display','none')
+            }
+        }
+        var changeSummary = function() {
+            if (jQuery('#QN_SUMMARY').val().length>=2000) {
+                jQuery('#QN_SUMMARY').val( jQuery('#QN_SUMMARY').val().substr(0,2000) )
+            };
+            jQuery('#spanTextLength').text( jQuery('#QN_SUMMARY').val().length );
+        }
+        var changeProvince = function() {
+            jQuery.ajax({
+                url: '/rst/util/city?p='+jQuery('#QN_PROVINCE').val(),
+                async: false,
+                cache: false,
+                beforeSend: function() {},
+                success: function(retval) {
+                    var data = JSON.parse(retval);
+                    jQuery("#QN_CITY").html('');
+                    var option = '';
+                    for(var i=0; i<data.length; i++) {
+                        option += '<option value="'+data[i]+'">'+data[i]+'</option>';
+                    }
+                    jQuery("#QN_CITY").html(option);
+                },
+                error: ajaxErrorHandle
+            });
+        }
+        var checkForm = function(callOK) {
+            if (!jQuery('#QN_TITLE').val()) {
+                showDialogMessage('请输入问卷标题',function(){
+                    jQuery('#QN_TITLE').focus();
+                });
+                return false;
+            } else if (jQuery('#QN_TITLE').val().length>64) {
+                showDialogMessage('问卷标题最多64个字！',function(){
+                    jQuery('#QN_TITLE').focus();
+                });
+                return false;
+            };
+            if (!jQuery('#QN_MAX').val()) {
+                showDialogMessage('请输入目标样本数',function(){
+                    jQuery('#QN_MAX').focus();
+                });
+                return false;
+            };
+            var noImg1 = (!jQuery('#IMG1').val() && jQuery.trim(jQuery('#uploaderFiles1').html())=='');
+            var shwmsg = '';
+            if (noImg1) {
+                shwmsg = '缺少微信消息图，点击确定继续，点击取消返回添加图片？'
+                showConfirmMessage('提示',shwmsg,function(){
+                    callOK();
+                });
+            } else {
+                callOK();
+            }
+        }
+        var clickGoOn = function () {
+            checkForm(function(){
+                if (JSON.stringify(jQuery('#theform').serialize())==jQuery('#oldval').val()) {
+                    $if QNOBJ and QNOBJ.WIN_SERIAL:
+                        document.location.href = 'predeploy?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid=$(QNOBJ.QN_ID if QNOBJ else '')';
+                    $else:
+                        document.location.href = 'question?fsid=$(FSOBJ.FS_ID)&r=$random_value&qnid=$(QNOBJ.QN_ID if QNOBJ else '')';
+                    return;
+                };
+                jQuery.ajax({
+                    url: '/rst/createqs',
+                    type: "POST",
+                    async: true,
+                    data: jQuery('#theform').serialize(),
+                    beforeSend: function() {blockUI('#pageBody')},
+                    success: function(retval) {
+                        var data = JSON.parse(retval);
+                        if (data.success) {
+                            jQuery('#oldval').val(JSON.stringify(jQuery('#theform').serialize()));
+                            document.location.href = data.success;
+                        } else if (data.error) {
+                            showDialogMessage(data.error)
+                        } else {
+                            showDialogMessage('发生未知错误')
+                        }
+                    },
+                    complete: function() {unblockUI('#pageBody')},
+                    error: ajaxErrorHandle
+                });
+            })
+        }
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'hideAllNonBaseMenuItem'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+            wx.error(function(res){
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>

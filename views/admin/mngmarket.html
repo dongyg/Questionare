@@ -1,0 +1,159 @@
+$def with (pagedata={},param={})
+$code:
+    #查看营销推广数据，支付推广报酬
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    STMARKET = pagedata.get('STMARKET',[])
+    random_value = pagedata.get('r','')
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>查看营销推广数据</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-metro.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/uniform/css/uniform.default.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.qs.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            查看营销推广数据
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+
+                    </div>
+                </div>
+            <br>
+            <div class="accordion" id="accordion1">
+                $for ditem in STMARKET:
+                    <div class="accordion-group" id="group_$ditem.YYYYMMDD">
+                        <div class="accordion-heading">
+                            <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_$ditem.YYYYMMDD" style="padding-right: 40px;">
+                            <i class="icon-heart-empty"></i> $get_yyyy_mm_dd(ditem.YYYYMMDD) 吸粉: $(ditem.SUM_D1_COUNT+ditem.SUM_D2_COUNT)
+                            </a>
+                        </div>
+                        <div id="collapse_$ditem.YYYYMMDD" class="accordion-body collapse">
+                            <div class="accordion-inner">
+                            推广人员数：$(ditem.SALER_COUNT)<br>
+                            累计推广费：$(ditem.SUM_D1_MONEY+ditem.SUM_D2_MONEY)<br>
+                            $if ditem.get('DETAILS',[]):
+                                <table class="table table-bordered table-hover"><tr><td>日期</td><td>人员</td><td>直接粉</td><td>间接粉</td><td>总金额</td><td>状态</td></tr>
+                            $for pre in ditem.get('DETAILS',[]):
+                                <tr>
+                                    <td>$pre.YYYYMMDD</td>
+                                    <td>$pre.FS_ID</td>
+                                    <td>$pre.COUNT_D1</td>
+                                    <td>$pre.COUNT_D2</td>
+                                    <td>$(pre.MONEY_D1+pre.MONEY_D2)</td>
+                                    <td><span id="ss_$(pre.YYYYMMDD)_$(pre.FS_ID)">$pre.STATUS</span>
+                                        $if pre.STATUS==0:
+                                            <button class="btn mini" id="btn_$(pre.YYYYMMDD)_$(pre.FS_ID)" onclick="clickPayThis($pre.YYYYMMDD,$pre.FS_ID)">支付</button>
+                                    </td>
+                                </tr>
+                            $if ditem.get('DETAILS',[]):
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+                <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+                <p class="weui-toast__content" id="toastMessage">已完成</p>
+            </div>
+        </div>
+        <!--end toast-->
+        <!--BEGIN dialog1-->
+        <div class="js_dialog" id="iosDialog1" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__hd"><strong class="weui-dialog__title" id="confirmTitle"></strong></div>
+                <div class="weui-dialog__bd" id="confirmMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_default">取消</a>
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">确定</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog1-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js" type="text/javascript"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/bootstrap.min.js" type="text/javascript"></script>
+    <script src="$static_host/static/uniform/jquery.uniform.min.js" type="text/javascript" ></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/weui/zepto.min.js"></script>
+    <script src="$static_host/static/weui/weui.min.js"></script>
+    <script>
+        jQuery(document).ready(function() {
+        });
+        var clickPayThis = function(yyyymmdd,fsid) {
+            if (confirm("确认支付这笔推广费吗？")) {
+                jQuery.ajax({
+                    url: '/admin/paymarket',
+                    type: "POST",
+                    data: {'fsid':'$(FSOBJ.FS_ID)','r':'$random_value','yyyymmdd':yyyymmdd,'busiid':fsid},
+                    async: false,
+                    beforeSend: function() {},
+                    success: function(retval) {
+                        var data = JSON.parse(retval);
+                        if (data.success) {
+                            showDialogMessage('操作成功');
+                        } else if (data.error) {
+                            showDialogMessage(data.error)
+                        } else {
+                            showDialogMessage(retval)
+                            // showDialogMessage('发生未知错误')
+                        }
+                    },
+                    error: ajaxErrorHandle
+                });
+            };
+        }
+    </script>
+</body>
+</html>

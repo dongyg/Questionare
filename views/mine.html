@@ -1,0 +1,332 @@
+$def with (pagedata={})
+$code:
+    #个人信息设置
+    static_host = pagedata.get('static_host','')
+    FSOBJ = pagedata.get('FSOBJ')
+    signPackage = pagedata.get('signPackage',{})
+
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!--> <html lang="en"> <!--<![endif]-->
+<!-- BEGIN HEAD -->
+<head>
+    <meta charset="utf-8" />
+    <meta name="author" content="LiuLijuan" />
+    <meta name="keywords" content="有奖问卷 调查问卷" />
+    <meta name="description" content="做最专业的有奖问卷调查系统" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>个人信息</title>
+    <link href="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/css/style-responsive.min.css" rel="stylesheet" type="text/css"/>
+    <link href="$static_host/static/uniform/css/uniform.default.min.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/weui.min.css"/>
+    <link rel="stylesheet" href="$static_host/static/weui/example.css"/>
+    <style type="text/css">
+    /*修改一点weui原本的css*/
+    .weui-cells__title {color: #666;font-size: 16px;}
+    .weui-cells__tips {font-size: 14px;}
+    .weui-toast {width: 70%;left: 15%;margin-left:0px;border-radius: 5px !important;}
+    .weui-icon_toast:before {color: #fff;font-size: 55px}
+    .weui-dialog {border-radius: 5px !important;}
+    .edit {position: absolute;right: 0px;margin-top: -40px;}
+    button {border-radius: 5px !important;}
+    a {text-decoration: none !important;}
+    body {font-size: 16px;}
+    label {font-size: 16px;}
+    .btn {font-size: 16px; padding: 10px 14px;}
+    .btn-group > .btn, .btn-group > .dropdown-menu, .btn-group > .popover {font-size: 16px;}
+    .dropdown-menu li > a {padding: 14px 0 14px 13px;}
+    </style>
+</head>
+<body class="page-header-fixed page-full-width">
+    <div class="page">
+        <div class="page__bd">
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-tab">
+                    <div class="weui-navbar">
+                        <div class="weui-navbar__item weui-bar__item_on">
+                            个人信息
+                        </div>
+                    </div>
+                    <div class="weui-tab__panel">
+
+                    </div>
+                </div>
+
+            <form action="/rst/mine" method="POST" class="form-horizontal" id="theform">
+            <input type="hidden" id="fsid" name="fsid" value="$(FSOBJ.FS_ID if FSOBJ else '')">
+            <input type="hidden" id="r" name="r" value="$(pagedata.get('r') or '')">
+            <br>
+            <div class="accordion" id="accordion1">
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_area" >
+                        <i class="icon-screenshot"></i> 所在地
+                        </a>
+                    </div>
+                    <div id="collapse_area" class="accordion-body collapse in">
+                        <div class="accordion-inner">
+                <div class="weui-cell weui-cell_select weui-cell_select-after">
+                    <div class="weui-cell__hd">
+                        <span for="" class="weui-label">省份</span>
+                    </div>
+                    <div class="weui-cell__bd">
+                        <select class="weui-select" id="PROVINCE" name="PROVINCE" onchange="changeProvince();">
+                            <option value="">未设置</option>
+                            <option value="北京">北京</option>
+                            <option value="天津">天津</option>
+                            <option value="河北">河北</option>
+                            <option value="山西">山西</option>
+                            <option value="内蒙古">内蒙古</option>
+                            <option value="辽宁">辽宁</option>
+                            <option value="吉林">吉林</option>
+                            <option value="黑龙江">黑龙江</option>
+                            <option value="上海">上海</option>
+                            <option value="江苏">江苏</option>
+                            <option value="浙江">浙江</option>
+                            <option value="安徽">安徽</option>
+                            <option value="福建">福建</option>
+                            <option value="江西">江西</option>
+                            <option value="山东">山东</option>
+                            <option value="河南">河南</option>
+                            <option value="湖北">湖北</option>
+                            <option value="湖南">湖南</option>
+                            <option value="广东">广东</option>
+                            <option value="广西">广西</option>
+                            <option value="海南">海南</option>
+                            <option value="重庆">重庆</option>
+                            <option value="四川">四川</option>
+                            <option value="贵州">贵州</option>
+                            <option value="云南">云南</option>
+                            <option value="西藏">西藏</option>
+                            <option value="陕西">陕西</option>
+                            <option value="甘肃">甘肃</option>
+                            <option value="青海">青海</option>
+                            <option value="宁夏">宁夏</option>
+                            <option value="新疆">新疆</option>
+                            <option value="香港">香港</option>
+                            <option value="澳门">澳门</option>
+                            <option value="台湾">台湾</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="weui-cell weui-cell_select weui-cell_select-after">
+                    <div class="weui-cell__hd">
+                        <span for="" class="weui-label">城市</span>
+                    </div>
+                    <div class="weui-cell__bd">
+                        <select class="weui-select" id="CITY" name="CITY">
+                            <option value="">未设置</option>
+                        </select>
+                    </div>
+                </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_sex" >
+                        <i class="icon-female"></i> 性别
+                        </a>
+                    </div>
+                    <div id="collapse_sex" class="accordion-body collapse in">
+                        <div class="accordion-inner">
+                            <label class="radio"><input type="radio" id="in_sex_0" name="in_sex" value="0" $:('checked' if FSOBJ and FSOBJ.SEX==0 else '') />不方便透露</label>
+                            <label class="radio"><input type="radio" id="in_sex_1" name="in_sex" value="1" $:('checked' if FSOBJ and FSOBJ.SEX==1 else '') />男</label>
+                            <label class="radio"><input type="radio" id="in_sex_2" name="in_sex" value="2" $:('checked' if FSOBJ and FSOBJ.SEX==2 else '') />女</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_age" >
+                        <i class="icon-user"></i> 年龄
+                        </a>
+                    </div>
+                    <div id="collapse_age" class="accordion-body collapse in">
+                        <div class="accordion-inner">
+                            <label class="radio"><input type="radio" id="in_age_0" name="in_age" value="0" $:('checked' if FSOBJ and FSOBJ.P2_AGE==1 else '') />不方便透露</label>
+                            <label class="radio"><input type="radio" id="in_age_1" name="in_age" value="1" $:('checked' if FSOBJ and FSOBJ.P2_AGE==2 else '') />20岁及以下</label>
+                            <label class="radio"><input type="radio" id="in_age_2" name="in_age" value="2" $:('checked' if FSOBJ and FSOBJ.P2_AGE==4 else '') />21-25岁</label>
+                            <label class="radio"><input type="radio" id="in_age_3" name="in_age" value="3" $:('checked' if FSOBJ and FSOBJ.P2_AGE==8 else '') />26-30岁</label>
+                            <label class="radio"><input type="radio" id="in_age_4" name="in_age" value="4" $:('checked' if FSOBJ and FSOBJ.P2_AGE==16 else '') />31-40岁</label>
+                            <label class="radio"><input type="radio" id="in_age_5" name="in_age" value="5" $:('checked' if FSOBJ and FSOBJ.P2_AGE==32 else '') />41-50岁</label>
+                            <label class="radio"><input type="radio" id="in_age_6" name="in_age" value="6" $:('checked' if FSOBJ and FSOBJ.P2_AGE==64 else '') />51-60岁</label>
+                            <label class="radio"><input type="radio" id="in_age_7" name="in_age" value="7" $:('checked' if FSOBJ and FSOBJ.P2_AGE==128 else '') />60岁以上</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_marriage" >
+                        <i class="icon-group"></i> 婚姻状况
+                        </a>
+                    </div>
+                    <div id="collapse_marriage" class="accordion-body collapse in">
+                        <div class="accordion-inner">
+                            <label class="radio"><input type="radio" id="in_marriage_0" name="in_marriage" value="0" $:('checked' if FSOBJ and FSOBJ.P2_MARRIAGE==1 else '') />不方便透露</label>
+                            <label class="radio"><input type="radio" id="in_marriage_1" name="in_marriage" value="1" $:('checked' if FSOBJ and FSOBJ.P2_MARRIAGE==2 else '') />已婚</label>
+                            <label class="radio"><input type="radio" id="in_marriage_2" name="in_marriage" value="2" $:('checked' if FSOBJ and FSOBJ.P2_MARRIAGE==4 else '') />未婚</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_academic" >
+                        <i class="icon-certificate"></i> 最高学历
+                        </a>
+                    </div>
+                    <div id="collapse_academic" class="accordion-body collapse in">
+                        <div class="accordion-inner">
+                            <label class="radio"><input type="radio" id="in_academic_0" name="in_academic" value="0" $:('checked' if FSOBJ and FSOBJ.P2_ACADEMIC==1 else '') />不方便透露</label>
+                            <label class="radio"><input type="radio" id="in_academic_1" name="in_academic" value="1" $:('checked' if FSOBJ and FSOBJ.P2_ACADEMIC==2 else '') />初中及以下</label>
+                            <label class="radio"><input type="radio" id="in_academic_2" name="in_academic" value="2" $:('checked' if FSOBJ and FSOBJ.P2_ACADEMIC==4 else '') />高中/中专</label>
+                            <label class="radio"><input type="radio" id="in_academic_3" name="in_academic" value="3" $:('checked' if FSOBJ and FSOBJ.P2_ACADEMIC==8 else '') />大专</label>
+                            <label class="radio"><input type="radio" id="in_academic_4" name="in_academic" value="4" $:('checked' if FSOBJ and FSOBJ.P2_ACADEMIC==16 else '') />本科</label>
+                            <label class="radio"><input type="radio" id="in_academic_5" name="in_academic" value="5" $:('checked' if FSOBJ and FSOBJ.P2_ACADEMIC==32 else '') />硕士</label>
+                            <label class="radio"><input type="radio" id="in_academic_6" name="in_academic" value="6" $:('checked' if FSOBJ and FSOBJ.P2_ACADEMIC==64 else '') />博士</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-group">
+                    <div class="accordion-heading">
+                        <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_income" >
+                        <i class="icon-money"></i> 月收入
+                        </a>
+                    </div>
+                    <div id="collapse_income" class="accordion-body collapse in">
+                        <div class="accordion-inner">
+                            <label class="radio"><input type="radio" id="in_income_0" name="in_income" value="0" $:('checked' if FSOBJ and FSOBJ.P2_INCOME==1 else '') />不方便透露</label>
+                            <label class="radio"><input type="radio" id="in_income_1" name="in_income" value="1" $:('checked' if FSOBJ and FSOBJ.P2_INCOME==2 else '') />1000元以下</label>
+                            <label class="radio"><input type="radio" id="in_income_2" name="in_income" value="2" $:('checked' if FSOBJ and FSOBJ.P2_INCOME==4 else '') />1001-2000元</label>
+                            <label class="radio"><input type="radio" id="in_income_3" name="in_income" value="3" $:('checked' if FSOBJ and FSOBJ.P2_INCOME==8 else '') />2001-3000元</label>
+                            <label class="radio"><input type="radio" id="in_income_4" name="in_income" value="4" $:('checked' if FSOBJ and FSOBJ.P2_INCOME==16 else '') />3001-5000元</label>
+                            <label class="radio"><input type="radio" id="in_income_5" name="in_income" value="5" $:('checked' if FSOBJ and FSOBJ.P2_INCOME==32 else '') />5001-8000元</label>
+                            <label class="radio"><input type="radio" id="in_income_6" name="in_income" value="6" $:('checked' if FSOBJ and FSOBJ.P2_INCOME==64 else '') />8001-10000元</label>
+                            <label class="radio"><input type="radio" id="in_income_7" name="in_income" value="7" $:('checked' if FSOBJ and FSOBJ.P2_INCOME==128 else '') />10001-20000元</label>
+                            <label class="radio"><input type="radio" id="in_income_8" name="in_income" value="8" $:('checked' if FSOBJ and FSOBJ.P2_INCOME==256 else '') />20000元以上</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </form>
+
+            <div class="weui-btn-area">
+                $if FSOBJ:
+                    <button class="weui-btn weui-btn_primary" onclick="javascript:clickSave();">保存个人信息</button>
+                $else:
+                    <button class="weui-btn weui-btn_disabled weui-btn_primary">保存个人信息</button>
+            </div>
+            $if pagedata['HTTP_USER_AGENT'].find('MicroMessenger')<0:
+                <div class="weui-btn-area">
+                    <button class="weui-btn weui-btn_default" onclick="javascript:history.back();">返回</button>
+                </div>
+        </div>
+        <!--BEGIN toast-->
+        <div id="toast" style="display: none;">
+            <div class="weui-mask_transparent"></div>
+            <div class="weui-toast">
+                <i class="weui-icon-success-no-circle weui-icon_toast" id="toastSuccess" style="display:none;"></i>
+                <i class="weui-icon-warn weui-icon_toast" id="toastError" style="display:none;"></i>
+                <p class="weui-toast__content" id="toastMessage">已完成</p>
+            </div>
+        </div>
+        <!--end toast-->
+        <!--BEGIN dialog2-->
+        <div class="js_dialog" id="iosDialog2" style="display: none;">
+            <div class="weui-mask"></div>
+            <div class="weui-dialog">
+                <div class="weui-dialog__bd" id="dialogMessage"></div>
+                <div class="weui-dialog__ft">
+                    <a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary">知道了</a>
+                </div>
+            </div>
+        </div>
+        <!--END dialog2-->
+    </div>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.10.1.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/2.3.2/bootstrap.min.js"></script>
+    <script src="$static_host/static/uniform/jquery.uniform.min.js" type="text/javascript" ></script>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="$static_host/static/qsnaire.min.js" type="text/javascript" ></script>
+    <script>
+        jQuery(document).ready(function() {
+            initSelectAndImage();
+            // jQuery('input[type="radio"]').bind("click",collAndExp);
+            initUniform();
+        });
+        var initSelectAndImage = function() {
+            jQuery("#PROVINCE").val("$(FSOBJ.PROVINCE if FSOBJ else '')");
+            changeProvince();
+            jQuery("#CITY").val("$(FSOBJ.CITY if FSOBJ else '')")
+        }
+        var changeProvince = function() {
+            jQuery.ajax({
+                url: '/rst/util/city?p='+jQuery('#PROVINCE').val(),
+                async: false,
+                cache: false,
+                beforeSend: function() {},
+                success: function(retval) {
+                    var data = JSON.parse(retval);
+                    jQuery("#CITY").html('');
+                    var option = '';
+                    for(var i=0; i<data.length; i++) {
+                        var val = data[i];
+                        if (data[i]=='不限') {
+                            data[i]='未设置';
+                            val = '';
+                        };
+                        option += '<option value="'+val+'">'+data[i]+'</option>';
+                    }
+                    jQuery("#CITY").html(option);
+                },
+                error: ajaxErrorHandle
+            });
+        }
+        var collAndExp = function() {
+            //当前题目收起
+            var parent = jQuery(this).parents('.accordion-body.collapse.in');
+            parent.collapse('hide');
+            //下一题目展开
+            var next = parent.parent().next().find('.accordion-body.collapse');
+            next.collapse('show');
+        }
+        function clickSave() {
+            jQuery.ajax({
+                url: '/rst/mine',
+                type: "POST",
+                async: false,
+                data: jQuery('#theform').serialize(),
+                beforeSend: function() {},
+                success: function(retval) {
+                    console.log(retval)
+                    if (retval) { showDialogMessage(retval) };
+                },
+                error: ajaxErrorHandle
+            });
+        };
+    </script>
+    <script type="text/javascript">
+        wx.config({
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: '$pagedata.get("APPID","")', // 必填，公众号的唯一标识
+            timestamp: '$signPackage.get("timestamp","")', // 必填，生成签名的时间戳
+            nonceStr: '$signPackage.get("noncestr","")', // 必填，生成签名的随机串
+            signature: '$signPackage.get("signature","")',// 必填，签名，见附录1
+            jsApiList: [
+                'checkJsApi',
+                'hideAllNonBaseMenuItem'
+            ] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+        });
+        wx.ready(function () {
+            wx.hideAllNonBaseMenuItem();
+            wx.error(function(res){
+                console.log("errorMSG:"+JSON.stringify(res));
+            });
+        });
+    </script>
+</body>
+</html>
